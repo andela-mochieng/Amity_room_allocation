@@ -1,29 +1,34 @@
-class Room(object):
-    
-    def __init__(self, **kwargs):
-        if kwargs:
-            self.name = kwargs.get['name', '']
-            self.type = kwargs.get['type', '']
-            self.capacity = kwargs['capacity', 0]
+''' class that creates office and living space properties'''
 
 
-class Offices(Room):
-    """offices a class object inherits
-     from Room it contains a  class variable capacity """
-    capacity = 6
-    type = 'Office'
+class Office(Object):
+    """initialises a capacity of 6 to be occupated by staff and fellows """
 
-    def __repr__(self):
-        return 'name:{},room_type:{},capacity:{}'\
-                .format(self.name, self.type, self.capacity)
+    def __init__(self, name, capacity=6):
+        self.name = name
+        self.capacity = capacity
+        self.roomOccupants = []
+
+    def add_member(self, occupant):
+        """ method that appends/adds new occupant to roomOccupants """
+        self.roomOccupants.append(occupant)
 
 
-class living_space(Room):
-    """ living_space a class object inherits
-     from Room, it contains a  class variable capacity """
-    capacity = 4
-    type = 'living_area'
+class living_space(Office):
+    """this clas inherits from Office """
 
-    def __repr__(self):
-        return 'name:{},room_type:{},capacity:{}'\
-                .format(self.name, self.type, self.capacity)
+    def __init__(self, roomtype, name, capacity=4):
+        """this __init__ override the init in the Office """
+        super(living_space, self).__init__(roomtype, name)
+        self.roomtype = roomtype
+        self.name = name
+        self.capacity = capacity
+        self.male = []
+        self.female = []
+
+    def add_fellow(self, occupant):
+        """method adds fellows according to they gender to a room"""
+        if self.roomtype == 'm':
+            self.male.append(occupant)
+        else:
+            self.female.append(occupant)
