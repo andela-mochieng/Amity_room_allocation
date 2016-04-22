@@ -1,7 +1,7 @@
 ''' class that creates office and living space properties'''
 
 
-class Office(Object):
+class Office(object):
     """initialises a capacity of 6 to be occupated by staff and fellows """
 
     def __init__(self, name, capacity=6):
