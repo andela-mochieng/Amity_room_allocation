@@ -1,6 +1,6 @@
 """Amity room allocation application has the following 
 Usage:
-    Amity create_rooms  (office_name|living_name)...
+    Amity create_rooms <room_name>...
     Amity add_person  <person_name> (FELLOW|STAFF) [wants_accommodation]
     Amity reallocate_person  <person_identifier> <new_room_name> 
     Amity load_people  add peopleto rooms from a txt file
@@ -17,7 +17,8 @@ from termcolor import cprint
 from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 from pyfiglet import figlet_format
-# from room_model import Office, living_space
+from db import DataManager
+# from models.room import Office, living_space
 import cmd
 # import random
 
@@ -56,7 +57,7 @@ class Amity(cmd.Cmd):
 
     # @comd
     def do_create_rooms(self, arg):
-        """Usage: create_rooms (office_name|living_name)"""
+        """Usage: create_rooms <room_name>"""
 
         create_rooms(arg)
 
@@ -68,7 +69,6 @@ class Amity(cmd.Cmd):
     def do_reallocate_person(self, arg):
         """Usage: reallocate_person <person_identifier> <new_room_name>"""
         reallocate_person(arg)
-        
 
     def quit(self):
         self.root.destroy
@@ -84,12 +84,22 @@ opt = docopt(__doc__, sys.argv[1:])
 def create_rooms(docopt_args):
     """allows user to enter a list of room names"""
     room = docopt_args.split(' ')
+    room_type = raw_input(
+        "Enter room type: \n O: Office space \n L: Living space: \n")
+
+    while room_type != "O" and room_type != "L":
+        room_type = raw_input(
+            "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
+    rooms = {room_type: room}
+    print rooms
     
-    
+
+
 def add_person(docopt_args):
     person = []
     person.append(docopt_args)
     print person
+
 
 def reallocate_person(docopt_args):
     pass

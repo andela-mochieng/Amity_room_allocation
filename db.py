@@ -31,7 +31,7 @@ class DataManager(object):
     def create_tables(self):
         """ creating tables if they don't exist """
         self.query_db = ("CREATE TABLE IF NOT EXITS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                    Name TEXT ,Room_type TEXT, Occupants INT NOT NULL)")
+                    Office_name TEXT,Living_name TEXT)")
 
         self.query_db = ("CREATE TABLE IF NOT EXITS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, \
                     Name TEXT NOT NULL, staff_type Text NOT NULL, Boarding INT)")
