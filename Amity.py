@@ -1,6 +1,6 @@
 """Amity room allocation application has the following 
 Usage:
-    Amity createrooms <room_name> 
+    Amity create_rooms <room_name>...
     Amity add_person <person_name> <FELLOW|STAFF> [wants_accommodation]
     Amity reallocate_person <person_identifier> <new_room_name> 
     Amity load_people  # add peopleto rooms from a txt file
@@ -16,30 +16,35 @@ import cmd
 from termcolor import cprint
 from colorama import init, Fore, Back, Style
 from docopt import docopt, DocoptExit
-from room_model import Office, living_space
-import cmd
-import random
+# from room_model import Office, living_space
+# import cmd
+# import random
 
 
-def comd(command):
+
+def comd(func):
     """function creates a decorator that checks if the correct 
     commands are passed to the commandline"""
 
-    def fn(self, args):
+    def fn(self, arg):
         try:
             """ compares commands passed with the ones in the documentation
              if not found show an error message"""
-            doc = docopt(fn.__doc__, args)
+            opt = docopt(fn.__doc__, arg)
 
         except DocoptExit as e:
             print("Invalid command passed")
             print(e)
-        return command(self, doc)
+            return
+
+        except SystemExit:
+            return
+        return func(self, opt)
 
         # __name__ calls the function
-        fn.__name__ = command.__name__
-        fn.__doc__ = command.__name__
-        fn.__dict__.update(command.__dict__)
+        fn.__name__ = func.__name__
+        fn.__doc__ = func.__name__
+        fn.__dict__.update(func.__dict__)
         return fn
 
 
@@ -51,7 +56,7 @@ class Amity(cmd.Cmd):
 
     @comd
     def do_create_rooms(self, arg):
-        """usage: createrooms <room_name> """
+        """usage: create_rooms <room_name> """
 
         create_rooms(arg)
 
@@ -73,12 +78,8 @@ rooms = []
 def create_rooms(docopt_args):
     """ allows user to enter a list of room names """
     room = "room names:", docopt_args["<rname>"]
-
-    with open('create_room.txt', mode='a+') as outfile:
-        rooms.append(room)
-        json.dump(rooms, outfile)
-        outfile.close()
-
+    print room
+    
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
