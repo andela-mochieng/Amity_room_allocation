@@ -1,8 +1,8 @@
 """Amity room allocation application has the following 
 Usage:
-    Amity create_rooms (office_name|living_name)...
-    Amity add_person <person_name> <FELLOW|STAFF> [wants_accommodation]
-    Amity reallocate_person <person_identifier> <new_room_name> 
+    Amity create_rooms  (office_name|living_name)..
+    Amity add_person  <person_name> (FELLOW|STAFF) [wants_accommodation]
+    Amity reallocate_person  <person_identifier> <new_room_name> 
     Amity load_people  # add peopleto rooms from a txt file
     Amity (-l | --launch)
     Amity (-h | --help)
@@ -14,7 +14,7 @@ Options:
 import sys
 import cmd
 from termcolor import cprint
-from colorama import init, Fore, Back, Style
+from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 from pyfiglet import figlet_format
 # from room_model import Office, living_space
@@ -23,8 +23,8 @@ import cmd
 
 
 def comd(func):
-    """function creates a decorator that checks if the correct 
-    commands are passed to the commandline"""
+    """function creates a decorator that checks if 
+    he correct commands are passed to the commandline"""
 
     def fn(self, arg):
         try:
@@ -54,16 +54,15 @@ class Amity(cmd.Cmd):
 
     prompt = '(Amity): '
 
-    @comd
-    def do_create_offices(self, arg):
-        """usage: create_rooms <office_name> """
+    # @comd
+    def do_create_rooms(self, arg):
+        """Usage: create_rooms (office_name:|living_name:)"""
 
-        create_offices(arg)
+        create_rooms(arg)
 
     def quit(self):
         self.root.destroy
 
-    @comd
     def do_quit(self, arg):
         """Exit application"""
         print("Amity closed")
@@ -72,12 +71,11 @@ class Amity(cmd.Cmd):
 opt = docopt(__doc__, sys.argv[1:])
 
 
-rooms = []
-
-
-def create_offices(docopt_args):
-    """ allows user to enter a list of room names """
-    room = "Office names:", docopt_args["<Oname>"]
+def create_rooms(docopt_args):
+    """allows user to enter a list of room names"""
+    room = []
+    print docopt_args
+    room.append(docopt_args)
     print room
 
 
