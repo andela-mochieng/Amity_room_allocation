@@ -17,6 +17,7 @@ class Amity(object):
 
     def __init__(self, d_path=os.path.dirname(os.path.abspath(__file__))):
         self.offices = []
+        self.living = []
         self.person = []
         self.office_name = ""
         self.d_path = d_path
@@ -36,14 +37,20 @@ class Amity(object):
         outFile.close()
         return(persons)
 
-    def create_office(self):
+    def create_office(self, args):
         """ allows user to enter a list of room names """
-        self.offices.append(self.office_name)
+        # print args
+        office_name = args['<office_name>']
+        self.offices.append(office_name)
         print self.offices
         self.save_office
 
-    def create_living_space(living_name):
-        print "living_name: %s" % living_name
+    def create_living_space(self, args):
+        living_name = args['<living_name>']
+        self.living.append(living_name)
+        print self.living
+
+        
 
         # self.rooms.append(room)
         # self.save_rooms()

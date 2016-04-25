@@ -1,14 +1,14 @@
 """Amity room allocation application has the following 
 Usage:
-    Amity create_rooms <room_name>...
+    Amity create_rooms (office_name|living_name)...
     Amity add_person <person_name> <FELLOW|STAFF> [wants_accommodation]
     Amity reallocate_person <person_identifier> <new_room_name> 
     Amity load_people  # add peopleto rooms from a txt file
     Amity (-l | --launch)
     Amity (-h | --help)
 Options:
-    -l --launch Launch the application.
-    -h --help display a list of command to the user    
+    -l, --launch  Launch the application.
+    -h,--help  display a list of command to the user    
 """
 
 import sys
@@ -16,10 +16,10 @@ import cmd
 from termcolor import cprint
 from colorama import init, Fore, Back, Style
 from docopt import docopt, DocoptExit
+from pyfiglet import figlet_format
 # from room_model import Office, living_space
-# import cmd
+import cmd
 # import random
-
 
 
 def comd(func):
@@ -41,11 +41,11 @@ def comd(func):
             return
         return func(self, opt)
 
-        # __name__ calls the function
-        fn.__name__ = func.__name__
-        fn.__doc__ = func.__name__
-        fn.__dict__.update(func.__dict__)
-        return fn
+    # __name__ calls the function
+    fn.__name__ = func.__name__
+    fn.__doc__ = func.__name__
+    fn.__dict__.update(func.__dict__)
+    return fn
 
 
 class Amity(cmd.Cmd):
@@ -55,10 +55,10 @@ class Amity(cmd.Cmd):
     prompt = '(Amity): '
 
     @comd
-    def do_create_rooms(self, arg):
-        """usage: create_rooms <room_name> """
+    def do_create_offices(self, arg):
+        """usage: create_rooms <office_name> """
 
-        create_rooms(arg)
+        create_offices(arg)
 
     def quit(self):
         self.root.destroy
@@ -75,17 +75,17 @@ opt = docopt(__doc__, sys.argv[1:])
 rooms = []
 
 
-def create_rooms(docopt_args):
+def create_offices(docopt_args):
     """ allows user to enter a list of room names """
-    room = "room names:", docopt_args["<rname>"]
+    room = "Office names:", docopt_args["<Oname>"]
     print room
-    
+
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
     cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
     print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-          style.DIM + '\n(type help to get a list of commands)' + Style.Normal)
+          Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
 
 if opt['--launch']:
     """ start the application """
