@@ -17,7 +17,8 @@ from termcolor import cprint
 from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 from pyfiglet import figlet_format
-from db import DataManager
+from db.dbase import DataManager
+# from clint.textui import colored, puts
 # from models.room import Office, living_space
 import cmd
 # import random
@@ -91,8 +92,16 @@ def create_rooms(docopt_args):
         room_type = raw_input(
             "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
     rooms = {room_type: room}
+    # import ipdb; ipdb.set_trace()
     print rooms
-    
+    db = DataManager("amity.db")
+    room_col = rooms
+    for key, values in room_col.iteritems():
+        for value in values:
+            cursor = db.query_db(
+                "INSERT INTO Rooms(Name, Room_type)VALUES ('" + value + "','" + key + "')")
+        return cursor
+        db.close_db()
 
 
 def add_person(docopt_args):
