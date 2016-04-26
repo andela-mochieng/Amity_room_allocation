@@ -1,6 +1,7 @@
 import sqlite3
 
 
+
 class DataManager(object):
     """a connention to the db is initiated inorder to create
     insert, retrieve and delete data """
@@ -30,12 +31,11 @@ class DataManager(object):
 
     def create_tables(self):
         """ creating tables if they don't exist """
-        self.query_db = ("CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                    Name TEXT,Room_type TEXT)")
+        self.query_db = ("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
 
-        self.query_db = ("CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                    Name TEXT NOT NULL, staff_type Text NOT NULL, Boarding INT)")
+        # self.query_db = ("CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, \
+        #             Name TEXT NOT NULL, staff_type Text NOT NULL, Boarding INT)")
 
-        self.query_db = ("CREATE TABLE IF NOT EXISTS Allocations(id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                    Personnel_Name TEXT NOT NULL,Personnel_type TEXT NOT NULL,\
-                    Room_name TEXT NOT NULL,Room_type TEXT NOT NULL)")
+        # self.query_db = ("CREATE TABLE IF NOT EXISTS Allocations(id INTEGER PRIMARY KEY AUTOINCREMENT, \
+        #             Personnel_Name TEXT NOT NULL,Personnel_type TEXT NOT NULL,\
+        #             Room_name TEXT NOT NULL,Room_type TEXT NOT NULL)")

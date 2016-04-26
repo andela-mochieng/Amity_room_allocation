@@ -18,6 +18,7 @@ from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 from pyfiglet import figlet_format
 from db.dbase import DataManager
+import sqlite3
 # from clint.textui import colored, puts
 # from models.room import Office, living_space
 import cmd
@@ -94,15 +95,17 @@ def create_rooms(docopt_args):
     rooms = {room_type: room}
     # import ipdb; ipdb.set_trace()
     print rooms
-    db = DataManager("amity.db")
+    conn = sqlite3.connect("amity.sqlite")
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
     room_col = rooms
     for key, values in room_col.iteritems():
         for value in values:
-            cursor = db.query_db(
-                "INSERT INTO Rooms(Name, Room_type)VALUES ('" + value + "','" + key + "')")
-        return cursor
-        db.close_db()
+            c.execute("INSERT INTO Rooms VALUES (?, ?)", (value, key))
+        conn.commit()
+    conn.close()
 
+    
 
 def add_person(docopt_args):
     person = []
