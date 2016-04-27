@@ -6,9 +6,9 @@ class DataManager(object):
     """a connention to the db is initiated inorder to create
     insert, retrieve and delete data """
 
-    def __init__(self, db):
+    def __init__(self):
         """ we connect to the db if tables are not """
-        self.conn = sqlite3.connect(db)
+        self.conn = sqlite3.connect("Amity.sqlite")
         self.c = self.conn.cursor()
         if self.table_num() < 1:
             self.create_tables()
@@ -17,6 +17,7 @@ class DataManager(object):
         self.c.execute(data)
         self.conn.commit()
         return self.c
+
 
     def table_num(self):
         """Gets a the number of tables present in the database"""

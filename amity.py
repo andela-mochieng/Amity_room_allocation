@@ -1,7 +1,7 @@
 """Amity room allocation application has the following 
 Usage:
     Amity create_rooms <room_name>...
-    Amity add_person  <person_name> (FELLOW|STAFF) [wants_accommodation]
+    Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [wants_accommodation]
     Amity reallocate_person  <person_identifier> <new_room_name> 
     Amity load_people  add peopleto rooms from a txt file
     Amity (-l | --launch)
@@ -23,6 +23,10 @@ import sqlite3
 # from models.room import Office, living_space
 import cmd
 # import random
+conn = sqlite3.connect("amity.sqlite")
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
 
 
 def comd(func):
@@ -64,7 +68,7 @@ class Amity(cmd.Cmd):
         create_rooms(arg)
 
     def do_add_person(self, arg):
-        """Usage: add_person <person_name> (FELLOW|STAFF) [wants_accommodation]"""
+        """Usage: add_person <person_fname> <person_lname>(FELLOW|STAFF) [wants_accommodation]"""
 
         add_person(arg)
 
@@ -95,9 +99,6 @@ def create_rooms(docopt_args):
     rooms = {room_type: room}
     # import ipdb; ipdb.set_trace()
     print rooms
-    conn = sqlite3.connect("amity.sqlite")
-    c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
     room_col = rooms
     for key, values in room_col.iteritems():
         for value in values:
@@ -105,12 +106,15 @@ def create_rooms(docopt_args):
         conn.commit()
     conn.close()
 
-    
 
 def add_person(docopt_args):
-    person = []
-    person.append(docopt_args)
-    print person
+    person = docopt_args.split(' ')
+    name = person[:2]
+    personnel_type = person[2]
+    want_accommodation = person[3]
+    c.execute("INSERT INTO Persons VALUES (?, ?, ?)", (str(name), str(personnel_type), str(want_accommodation)))
+    conn.commit()
+    conn.close()
 
 
 def reallocate_person(docopt_args):
