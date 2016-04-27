@@ -20,14 +20,16 @@ from pyfiglet import figlet_format
 from db.dbase import DataManager
 import sqlite3
 # from clint.textui import colored, puts
-# from models.room import Office, living_space
+from models.room import Office, Living_space
 import cmd
 import random
 
 conn = sqlite3.connect("amity.sqlite")
 c = conn.cursor()
-c.execute("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
-c.execute("CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
+c.execute(
+    "CREATE TABLE IF NOT EXISTS Rooms(Name TEXT, Room_type TEXT, capacity integer, available TEXT)")
+c.execute(
+    "CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
 
 
 def comd(func):
@@ -90,6 +92,11 @@ opt = docopt(__doc__, sys.argv[1:])
 
 def create_rooms(docopt_args):
     """allows user to enter a list of room names"""
+    office_data = []
+    living_data = []
+    office_populate = []
+    living_populate = []
+
     room = docopt_args.split(' ')
     room_type = raw_input(
         "Enter room type: \n O: Office space \n L: Living space: \n")
@@ -98,14 +105,39 @@ def create_rooms(docopt_args):
         room_type = raw_input(
             "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
     rooms = {room_type: room}
-    # import ipdb; ipdb.set_trace()
+    
     print rooms
-    room_col = rooms
-    for key, values in room_col.iteritems():
-        for value in values:
-            c.execute("INSERT INTO Rooms VALUES (?, ?)", (value, key))
+    for key, values in rooms.iteritems():
+        for value, index in enumerate(values):
+            if key.upper() == "O":
+                office_data.append(Office(values))
+            else:
+                living_data.append(Living_space(values))
+
+        for i, k in enumerate(office_data):
+            office_populate.append(([x for x in office_data[i].name],
+                                    office_data[i].room_type,
+                                    office_data[i].capacity,
+                                    ",".join(office_data[i].available)))
+        for i, k in enumerate(living_data):
+            living_populate.append(([x for x in living_data[i].name],
+                                    living_data[i].room_type,
+                                    living_data[i].capacity,
+                                    ",".join(living_data[i].available)))
+        if office_populate:
+            import ipdb
+            ipdb.set_trace()
+            for x in office_populate[0][0]:
+                print x
+                c.execute(
+                    "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(office_populate[0][1]), str(office_populate[0][2]), str(office_populate[0][3])))
+        else:
+            for x in living_populate[0][0]:
+                print x
+                c.execute(
+                "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
         conn.commit()
-    conn.close()
+        conn.close()
 
 
 def add_person(docopt_args):
@@ -113,7 +145,8 @@ def add_person(docopt_args):
     name = person[:2]
     personnel_type = person[2]
     want_accommodation = person[3]
-    c.execute("INSERT INTO Persons VALUES (?, ?, ?)", (str(name), str(personnel_type), str(want_accommodation)))
+    c.execute("INSERT INTO Persons VALUES (?, ?, ?)",
+              (str(name), str(personnel_type), str(want_accommodation)))
     conn.commit()
     conn.close()
 
