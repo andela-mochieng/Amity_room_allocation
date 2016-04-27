@@ -22,7 +22,8 @@ import sqlite3
 # from clint.textui import colored, puts
 # from models.room import Office, living_space
 import cmd
-# import random
+import random
+
 conn = sqlite3.connect("amity.sqlite")
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS Rooms(Name TEXT,Room_type TEXT)")
