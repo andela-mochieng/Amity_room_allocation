@@ -13,11 +13,11 @@ Options:
 
 import sys
 import cmd
-from termcolor import cprint
+# from termcolor import cprint
 from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
-from pyfiglet import figlet_format
-from db.dbase import DataManager
+# from pyfiglet import figlet_format
+# from db.dbase import DataManager
 import sqlite3
 # from clint.textui import colored, puts
 from models.room import Office, Living_space
@@ -118,12 +118,12 @@ def create_rooms(docopt_args):
             office_populate.append(([x for x in office_data[i].name],
                                     office_data[i].room_type,
                                     office_data[i].capacity,
-                                    "\n".join(office_data[i].available)))
+                                    ",".join(office_data[i].available)))
         for i, k in enumerate(living_data):
             living_populate.append(([x for x in living_data[i].name],
                                     living_data[i].room_type,
                                     living_data[i].capacity,
-                                    "\n".join(living_data[i].available)))
+                                    ",".join(living_data[i].available)))
         if office_populate:
             for x in office_populate[0][0]:
                 c.execute(
@@ -143,8 +143,6 @@ def add_person(docopt_args):
     c.execute("INSERT INTO Persons VALUES (?, ?, ?)",
               (str(name), str(personnel_type), str(want_accommodation)))
     conn.commit()
-    import ipdb
-    ipdb.set_trace()
     # allocation of fellows to living_space
     if want_accommodation.upper() == "Y":
         c.execute(
@@ -152,16 +150,17 @@ def add_person(docopt_args):
         for row in c:
             spaces = row[2].split(',')
             spaces = map(lambda x: x.encode('ascii'), spaces)
+            spaces = list(spaces)
             # if living space is empty
-            if '0' in spaces:
-                for index, space in enumerate(spaces):
-                    if item == '0':
-                        # item = name
-                        spaces[index] = line[0] + " " + line[1]
-                        spaces = ",".join(spaces)
-                        c.execute("UPDATE Rooms set available = ? where \
-                                    Name = ?", (spaces, row[0]))
-                        conn.commit()
+            print spaces
+            for index, space in enumerate(spaces):
+                if space == '0':
+                    spaces[index] = name
+                    spaces = ",".join(spaces)
+                    c.execute("UPDATE Rooms set available = ? where \
+                                Name = ?", (spaces, row[0]))
+                    conn.commit()
+                    break
 
 
 def reallocate_person(docopt_args):
@@ -170,9 +169,9 @@ def reallocate_person(docopt_args):
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
-    cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
-    print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-          Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
+    # cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
+    # print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
+    # Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
 
 if opt['--launch']:
     """ start the application """
