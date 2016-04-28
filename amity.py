@@ -105,7 +105,7 @@ def create_rooms(docopt_args):
         room_type = raw_input(
             "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
     rooms = {room_type: room}
-    
+
     print rooms
     for key, values in rooms.iteritems():
         for value, index in enumerate(values):
@@ -118,26 +118,21 @@ def create_rooms(docopt_args):
             office_populate.append(([x for x in office_data[i].name],
                                     office_data[i].room_type,
                                     office_data[i].capacity,
-                                    ",".join(office_data[i].available)))
+                                    "\n".join(office_data[i].available)))
         for i, k in enumerate(living_data):
             living_populate.append(([x for x in living_data[i].name],
                                     living_data[i].room_type,
                                     living_data[i].capacity,
-                                    ",".join(living_data[i].available)))
+                                    "\n".join(living_data[i].available)))
         if office_populate:
-            import ipdb
-            ipdb.set_trace()
             for x in office_populate[0][0]:
-                print x
                 c.execute(
                     "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(office_populate[0][1]), str(office_populate[0][2]), str(office_populate[0][3])))
         else:
             for x in living_populate[0][0]:
-                print x
                 c.execute(
-                "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
+                    "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
         conn.commit()
-        conn.close()
 
 
 def add_person(docopt_args):
@@ -148,7 +143,25 @@ def add_person(docopt_args):
     c.execute("INSERT INTO Persons VALUES (?, ?, ?)",
               (str(name), str(personnel_type), str(want_accommodation)))
     conn.commit()
-    conn.close()
+    import ipdb
+    ipdb.set_trace()
+    # allocation of fellows to living_space
+    if want_accommodation.upper() == "Y":
+        c.execute(
+            "SELECT Name, capacity, available from Rooms where Room_type = 'L' ")
+        for row in c:
+            spaces = row[2].split(',')
+            spaces = map(lambda x: x.encode('ascii'), spaces)
+            # if living space is empty
+            if '0' in spaces:
+                for index, space in enumerate(spaces):
+                    if item == '0':
+                        # item = name
+                        spaces[index] = line[0] + " " + line[1]
+                        spaces = ",".join(spaces)
+                        c.execute("UPDATE Rooms set available = ? where \
+                                    Name = ?", (spaces, row[0]))
+                        conn.commit()
 
 
 def reallocate_person(docopt_args):
