@@ -1,8 +1,9 @@
 class Personel(object):
     """personel model"""
 
-    def __init__(self, name, gender, position, want_accommodation=False):
+    def __init__(self, name):
         self.name = name
+        want_accommodation = 'N'
 
 
 class staff(Personel):
