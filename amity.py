@@ -27,10 +27,10 @@ import cmd
 import random
 
 conn = sqlite3.connect("amity.sqlite")
-c = conn.cursor()
-c.execute(
+connection = conn.cursor()
+connection.execute(
     "CREATE TABLE IF NOT EXISTS Rooms(Name TEXT, Room_type TEXT, capacity integer, available TEXT)")
-c.execute(
+connection.execute(
     "CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
 
 
@@ -100,6 +100,9 @@ office_data = []
 living_data = []
 office_populate = []
 living_populate = []
+name = " "
+personnel_type = " "
+want_accommodation = " "
 
 
 def create_rooms(docopt_args):
@@ -126,72 +129,77 @@ def create_rooms(docopt_args):
             office_populate.append((office_data[i].name,
                                     office_data[i].room_type,
                                     office_data[i].capacity,
-                                    ",".join(office_data[i].available)))
+                                    office_data[i].available))
         for i, k in enumerate(living_data):
             living_populate.append((living_data[i].name,
                                     living_data[i].room_type,
                                     living_data[i].capacity,
-                                    ",".join(living_data[i].available)))
+                                    living_data[i].available))
         if office_populate:
             for x in office_populate[0][0]:
-                c.execute(
+                connection.execute(
                     "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(office_populate[0][1]), str(office_populate[0][2]), str(office_populate[0][3])))
         else:
             for x in living_populate[0][0]:
-                c.execute(
+                connection.execute(
                     "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
         conn.commit()
 
 
+def allocate(**kwargs):
+    if kwargs['personnel_type'].upper() is 'STAFF' or 'FELLOW':
+        connection.execute(
+            "SELECT Name, capacity, available from Rooms where Room_type = \"O\"")
+        for row in connection:
+            print(row)
+            spaces = row[2].split()
+            spaces = map(lambda x: x.encode('ascii'), spaces)
+            spaces = list(spaces)
+            for index, space in enumerate(spaces):
+                if '0' in space:
+                    spaces[index] = (' ').join(kwargs['name'])
+                    new_spaces = (' ').join(str(item) for item in spaces)
+                    connection.execute("UPDATE Rooms set available = ? where \
+                                Name = ?", (new_spaces, row[0]))
+                    conn.commit()
+                    break
+            # break
+
+    if kwargs['want_accommodation'].upper() == 'Y':
+        connection.execute(
+            "SELECT Name, capacity, available from Rooms where Room_type = 'L' ")
+        for row in connection:
+            spaces = row[2].split()
+            spaces = map(lambda x: x.encode('ascii'), spaces)
+            spaces = list(spaces)
+        # if living space is empty
+            for index, space in enumerate(spaces):
+                if '0' in space:
+                    spaces[index] = (' ').join(kwargs['name'])
+                    new_spaces = (' ').join(str(item) for item in spaces)
+                    connection.execute("UPDATE Rooms set available = ? where \
+                                Name = ?", (new_spaces, row[0]))
+                    conn.commit()
+                    break
+
+
 def add_person(docopt_args):
     person = docopt_args.split(' ')
-    # print person # eg ['giant', 'gal', 'fellow', 'y']
+    print person  # eg ['giant', 'gal', 'fellow', 'y']
     name = person[:2]
     personnel_type = person[2]
     want_accommodation = person[3]
-    if personnel_type.upper() == "fellow":
-        c.execute("INSERT INTO Persons VALUES (?, ?, ?)",
+    if personnel_type.upper() == "FELLOW":
+        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
                   (str(name), str(personnel_type), str(want_accommodation)))
     else:
-        c.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                  (str(name), str(personnel_type), str(None)))
-
+        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
+                  (str(name), str(personnel_type), str('N')))
     conn.commit()
+    allocate(name=name, personnel_type=personnel_type,
+             want_accommodation=want_accommodation)
 
     # allocation of fellows to living_space
-    if want_accommodation.upper() == "Y":
-        c.execute(
-            "SELECT Name, capacity, available from Rooms where Room_type = 'L' ")
-        for row in c:
-            spaces = row[2].split(',')
-            spaces = map(lambda x: x.encode('ascii'), spaces)
-            spaces = list(spaces)
-            # if living space is empty
-            for index, space in enumerate(spaces):
-                if space == '0':
-                    spaces[index] = name
-                    new_spaces = " ".join(str(item) for item in spaces)
-                    c.execute("UPDATE Rooms set available = ? where \
-                                Name = ?", (new_spaces, row[0]))
-                    conn.commit()
-                    break
-
-    if personnel_type.upper() == "STAFF" or personnel_type.upper() == "FELLOW":
-        c.execute(
-            "SELECT Name, capacity, available from Rooms where Room_type = 'O' ")
-        for row in c:
-            spaces = row[2].split(',')
-            spaces = map(lambda x: x.encode('ascii'), spaces)
-            spaces = list(spaces)
-            for index, space in enumerate(spaces):
-                if space == '0':
-                    spaces[index] = name
-                    new_spaces = " ".join(str(item) for item in spaces)
-                    c.execute("UPDATE Rooms set available = ? where \
-                                Name = ?", (new_spaces, row[0]))
-                    conn.commit()
-                    break
-            break
 
 
 def reallocate_person(docopt_args):
@@ -203,12 +211,12 @@ def load_people(docopt_args):
     load.withdraw()
     load.update()
     file = tkFileDialog.askopenfile(parent=load, mode='rb', title="Load file")
-    if file:
-        save_file_path(file.name)
     import ipdb
     ipdb.set_trace()
+    if file:
+        save_file_path(file.name)
     filelines = []
-    with open("file", "r+") as f:
+    with open("file.name", "r+") as f:
         for line in f:
             if len(line) > 2:
                 filelines.append(line.split())
@@ -217,7 +225,10 @@ def load_people(docopt_args):
     for line in filelines:
         load_personnel = add_person(line)
         print load_personnel
+
         
+
+
 def save_file_path(path):
     with open("filePath", "w+") as f:
         f.write(path)
