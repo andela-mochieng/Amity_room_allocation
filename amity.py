@@ -121,7 +121,11 @@ want_accommodation = " "
 room_name = ""
 room_type = ""
 people_room = ""
+people_in_room = []
 # variables used in print_allocation function
+person_name = []
+person_type = ""
+person_accommodate = ""
 
 
 def create_rooms(docopt_args):
@@ -269,7 +273,7 @@ def load_people(docopt_args):
 
 def print_allocations(docopt_args):
     """function screens data  from db to the cmdline and into a file """
-    allocate = docopt_args.split(' ')
+    allocates = docopt_args.split(' ')
     connection.execute(
         "SELECT Name, Room_type, available from Rooms")
     # (u'lilac', u'O', u'lions sheila kiura alex margie johns mtu mzima mtu mzima wacha tu')
@@ -280,25 +284,41 @@ def print_allocations(docopt_args):
         people_room = i[2]
         puts(colored.red(room_name) + " " +
              colored.white(room_type) + " " + colored.blue(people_room))
-
-        if len(allocate) > 0:
-            filename = allocate[-1]
-            f = open(filename, 'a+')
-            newdata = room_name + "', '" + \
-                room_type + "', '" + people_room + '\n'
-            f.write(newdata)
-            f.close()
+        people_in_room.append(people_room)
+        if len(allocates) > 0:
+            file_entry(allocates=allocates, room_name=room_name, room_type=room_type, 
+                        people_room=people_room)
         else:
             print('No filename specificied')
+    
 
+def file_entry(**kwargs):
+    import ipdb
+    ipdb.set_trace()
+    allocates = kwargs['allocates']
+    filename = allocates[-1]
+    f = open(filename, 'a+')
+    newdata = room_name + "', '" + \
+        room_type + "', '" + people_room + '\n'
+    f.write(newdata)
+    
 
-def print_unallocated():
+def print_unallocated(docopt_args):
     unallocate = docopt_args.split(' ')
-    connection.execute("SELECT Name, Personel_type, want_accommodation from Persons")
+    connection.execute(
+        "SELECT Name, Personel_type, want_accommodation from Persons")
     for name in connection:
         name = map(lambda x: x.encode('ascii'), name)
-        print name
+        person_name = name[0]
+        person_type = name[1]
+        person_accommodate = name[2] 
+        if person_name != people_in_room:
+            puts(colored.red(person_name) + " " +
+                 colored.white(person_type) + " " + colored.blue(person_accommodate))
 
+   
+
+        
 
 def save_file_path(path):
     with open("filePath", "w+") as f:
