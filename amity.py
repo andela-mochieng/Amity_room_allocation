@@ -6,6 +6,7 @@ Usage:
     Amity load_people
     Amity print_allocations [-o=filename]
     Amity print_unallocated [-o=filename]
+    Amity load_state <sqlite_database>
     Amity print_room <room_name>
     Amity (-l | --launch)
     Amity (-h | --help)
@@ -103,6 +104,11 @@ class Amity(cmd.Cmd):
         """Usage: print_room <room_name>"""
 
         print_room(arg)
+
+    def do_load_state(self, arg):
+        """Usage: load_state <sqlite_database>"""
+
+        load_state(arg)
 
     def quit(self):
         self.root.destroy
@@ -303,6 +309,7 @@ def print_allocations(docopt_args):
 
 
 def print_room(docopt_args):
+    """function prints out members of a room"""
     room = docopt_args.split(' ')
     connection.execute(
         "SELECT Name, available from Rooms where Name = ?", (room))
@@ -339,6 +346,13 @@ def print_unallocated(docopt_args):
 def save_file_path(path):
     with open("filePath", "w+") as f:
         f.write(path)
+
+
+def load_state(docopt_args):
+    connection.execute("SELECT * FROM Rooms")
+    print connection.fetchall()
+    connection.execute("SELECT * FROM Persons")
+    print connection.fetchall()
 
 
 def welcome_msg():
