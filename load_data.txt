@@ -1,10 +1,7 @@
-Cory    Swanson fellow y
-Kim     Harmon  staff
-Judy    Powell  staff
-Krista  Jimenez fellow n
-Wendell Ingram  fellow y
-Vincent Lawrence staff
-Abel    Yates    fellow y
-Leroy   Osborne  staff
-Lauren  Sutton   fellow n
-Nelson  Franklin  staff
+Cory Swanson fellow Y
+Kim Harmon staff
+Judy Powell staff
+Wiseman Said Fellow Y
+Brian Idambo Staff
+Simon Giks Fellow Y
+Joe Gikera Fellow N

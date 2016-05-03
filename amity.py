@@ -4,6 +4,8 @@ Usage:
     Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [wants_accommodation]
     Amity reallocate_person  <person_identifier> <new_room_name> 
     Amity load_people  
+    Amity print_allocations [-o=filename]
+    Amity print_unallocated [-o=filename]
     Amity (-l | --launch)
     Amity (-h | --help)
 Options:
@@ -15,13 +17,14 @@ import sys
 import cmd
 from Tkinter import Tk
 import tkFileDialog
+from util.File import fileParser
 # from termcolor import cprint
 from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 # from pyfiglet import figlet_format
 # from db.dbase import DataManager
 import sqlite3
-# from clint.textui import colored, puts
+from clint.textui import colored, puts
 from models.room import Office, Living_space
 import cmd
 import random
@@ -85,6 +88,16 @@ class Amity(cmd.Cmd):
 
         load_people(arg)
 
+    def do_print_allocations(self, arg):
+        """Usage: print_allocations [-o=filename]"""
+
+        print_allocations(arg)
+
+    def do_print_unallocated(self, arg):
+        """Usage: print_unallocated [-o=filename]"""
+
+        print_unallocated(arg)
+
     def quit(self):
         self.root.destroy
 
@@ -103,6 +116,12 @@ living_populate = []
 name = " "
 personnel_type = " "
 want_accommodation = " "
+
+# variables used in print_allocation function
+room_name = ""
+room_type = ""
+people_room = ""
+# variables used in print_allocation function
 
 
 def create_rooms(docopt_args):
@@ -163,7 +182,6 @@ def allocate(**kwargs):
                                 Name = ?", (new_spaces, row[0]))
                     conn.commit()
                     break
-            # break
 
     if kwargs['want_accommodation'].upper() == 'Y':
         connection.execute(
@@ -189,21 +207,43 @@ def add_person(docopt_args):
     name = person[:2]
     personnel_type = person[2]
     want_accommodation = person[3]
-    if personnel_type.upper() == "FELLOW":
-        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                  (str(name), str(personnel_type), str(want_accommodation)))
-    else:
-        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                  (str(name), str(personnel_type), str('N')))
-    conn.commit()
+    insert_db(name=name, personnel_type=personnel_type,
+              want_accommodation=want_accommodation)
     allocate(name=name, personnel_type=personnel_type,
              want_accommodation=want_accommodation)
 
     # allocation of fellows to living_space
 
 
-def reallocate_person(docopt_args):
+def insert_db(**kwargs):
+    if personnel_type.upper() == "FELLOW":
+        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
+                           (str(name), str(personnel_type), str(want_accommodation)))
+    else:
+        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
+                           (str(name), str(personnel_type), str('N')))
+    conn.commit()
+
+
+def query_db(**kwargs):
     pass
+
+
+def reallocate_person(docopt_args):
+    person_room = docopt_args.split(' ')
+    person = person_room[:2]
+    exists = False
+    connention.execute(
+        "SELECT Name, capacity, available FROM Rooms where Room_type = 'L' or 'O'")
+    for row in connection:
+        list_spaces = row[2].split(',')
+        list_spaces = map(lambda x: x.encode('ascii'),
+                          list_space)
+        if name in list_spaces:
+            exists = True
+            break
+    if exists is False:
+        unallocated_persons.append(name)
 
 
 def load_people(docopt_args):
@@ -211,22 +251,53 @@ def load_people(docopt_args):
     load.withdraw()
     load.update()
     file = tkFileDialog.askopenfile(parent=load, mode='rb', title="Load file")
-    import ipdb
-    ipdb.set_trace()
     if file:
         save_file_path(file.name)
-    filelines = []
-    with open("file.name", "r+") as f:
-        for line in f:
-            if len(line) > 2:
-                filelines.append(line.split())
-    random.shuffle(filelines)
+        parser = fileParser(file.name)
+        input_data = parser.read_file()
+        for lines in input_data:
+            print lines
+            if len(lines) > 2:
+                name = lines[0]
+                personnel_type = lines[1]
+                want_accommodation = lines[2]
+                insert_db(name=name, personnel_type=personnel_type,
+                          want_accommodation=want_accommodation)
+                allocate(name=name, personnel_type=personnel_type,
+                         want_accommodation=want_accommodation)
 
-    for line in filelines:
-        load_personnel = add_person(line)
-        print load_personnel
 
-        
+def print_allocations(docopt_args):
+    """function screens data  from db to the cmdline and into a file """
+    allocate = docopt_args.split(' ')
+    connection.execute(
+        "SELECT Name, Room_type, available from Rooms")
+    # (u'lilac', u'O', u'lions sheila kiura alex margie johns mtu mzima mtu mzima wacha tu')
+    for i in connection:
+        i = map(lambda x: x.encode('ascii'), i)
+        room_name = i[0]
+        room_type = i[1]
+        people_room = i[2]
+        puts(colored.red(room_name) + " " +
+             colored.white(room_type) + " " + colored.blue(people_room))
+
+        if len(allocate) > 0:
+            filename = allocate[-1]
+            f = open(filename, 'a+')
+            newdata = room_name + "', '" + \
+                room_type + "', '" + people_room + '\n'
+            f.write(newdata)
+            f.close()
+        else:
+            print('No filename specificied')
+
+
+def print_unallocated():
+    unallocate = docopt_args.split(' ')
+    connection.execute("SELECT Name, Personel_type, want_accommodation from Persons")
+    for name in connection:
+        name = map(lambda x: x.encode('ascii'), name)
+        print name
 
 
 def save_file_path(path):
