@@ -1,16 +1,17 @@
-"""Amity room allocation application has the following 
+"""Amity room allocation application has the following
 Usage:
     Amity create_rooms <room_name>...
     Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [wants_accommodation]
-    Amity reallocate_person  <person_identifier> <new_room_name> 
-    Amity load_people  
+    Amity reallocate_person  <person_identifier> <new_room_name>
+    Amity load_people
     Amity print_allocations [-o=filename]
     Amity print_unallocated [-o=filename]
+    Amity print_room <room_name>
     Amity (-l | --launch)
     Amity (-h | --help)
 Options:
     -l, --launch  Launch the application.
-    -h,--help  display a list of command to the user    
+    -h,--help  display a list of command to the user
 """
 
 import sys
@@ -38,7 +39,7 @@ connection.execute(
 
 
 def comd(func):
-    """function creates a decorator that checks if 
+    """function creates a decorator that checks if
     he correct commands are passed to the commandline"""
 
     def fn(self, arg):
@@ -64,7 +65,7 @@ def comd(func):
 
 
 class Amity(cmd.Cmd):
-    """ this class maps how input arguments 
+    """ this class maps how input arguments
         are in relation to the methods """
 
     prompt = '(Amity): '
@@ -97,6 +98,11 @@ class Amity(cmd.Cmd):
         """Usage: print_unallocated [-o=filename]"""
 
         print_unallocated(arg)
+
+    def do_print_room(self, arg):
+        """Usage: print_room <room_name>"""
+
+        print_room(arg)
 
     def quit(self):
         self.root.destroy
@@ -273,7 +279,7 @@ def load_people(docopt_args):
 
 def print_allocations(docopt_args):
     """function screens data  from db to the cmdline and into a file """
-    allocates = docopt_args.split(' ')
+    allocate = docopt_args.split(' ')
     connection.execute(
         "SELECT Name, Room_type, available from Rooms")
     # (u'lilac', u'O', u'lions sheila kiura alex margie johns mtu mzima mtu mzima wacha tu')
@@ -285,23 +291,27 @@ def print_allocations(docopt_args):
         puts(colored.red(room_name) + " " +
              colored.white(room_type) + " " + colored.blue(people_room))
         people_in_room.append(people_room)
-        if len(allocates) > 0:
-            file_entry(allocates=allocates, room_name=room_name, room_type=room_type, 
-                        people_room=people_room)
+
+        if len(allocate) > 0:
+            filename = allocate[-1]
+            f = open(filename, 'a+')
+            newdata = room_name + "', '" + \
+                room_type + "', '" + people_room + '\n'
+            f.write(newdata)
         else:
             print('No filename specificied')
-    
 
-def file_entry(**kwargs):
-    import ipdb
-    ipdb.set_trace()
-    allocates = kwargs['allocates']
-    filename = allocates[-1]
-    f = open(filename, 'a+')
-    newdata = room_name + "', '" + \
-        room_type + "', '" + people_room + '\n'
-    f.write(newdata)
-    
+
+def print_room(docopt_args):
+    room = docopt_args.split(' ')
+    connection.execute(
+        "SELECT Name, available from Rooms where Name = ?", (room))
+    for allocated in connection:
+        allocated = map(lambda x: x.encode('ascii'),
+                        allocated)
+        return puts(colored.blue(allocated[1]))
+    print('No room with that name')
+
 
 def print_unallocated(docopt_args):
     unallocate = docopt_args.split(' ')
@@ -311,14 +321,20 @@ def print_unallocated(docopt_args):
         name = map(lambda x: x.encode('ascii'), name)
         person_name = name[0]
         person_type = name[1]
-        person_accommodate = name[2] 
+        person_accommodate = name[2]
         if person_name != people_in_room:
             puts(colored.red(person_name) + " " +
                  colored.white(person_type) + " " + colored.blue(person_accommodate))
 
-   
+        if len(unallocate) > 0:
+            filename = unallocate[-1]
+            f = open(filename, 'a+')
+            newdata = person_name + "', '" + \
+                person_type + "', '" + person_accommodate + '\n'
+            f.write(newdata)
+        else:
+            print('No filename specificied')
 
-        
 
 def save_file_path(path):
     with open("filePath", "w+") as f:
