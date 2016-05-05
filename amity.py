@@ -1,13 +1,13 @@
 """Amity room allocation application has the following
 Usage:
     Amity create_rooms <room_name>...
-    Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [wants_accommodation]
+    Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [--want_accommodation=n]
     Amity reallocate_person  <person_identifier> <new_room_name>
     Amity load_people
     Amity print_allocations [-o=filename]
     Amity print_unallocated [-o=filename]
-    Amity load_state <sqlite_database>
     Amity print_room <room_name>
+    Amity load_state <sqlite_database>
     Amity (-l | --launch)
     Amity (-h | --help)
 Options:
@@ -30,6 +30,7 @@ from clint.textui import colored, puts
 from models.room import Office, Living_space
 import cmd
 import random
+import unicodedata
 
 conn = sqlite3.connect("amity.sqlite")
 connection = conn.cursor()
@@ -120,14 +121,15 @@ class Amity(cmd.Cmd):
 
 opt = docopt(__doc__, sys.argv[1:])
 
-
+# variables used in create_rooms
 office_data = []
 living_data = []
 office_populate = []
 living_populate = []
-name = " "
-personnel_type = " "
-want_accommodation = " "
+# variables used in add_person
+name = ""
+personnel_type = ""
+want_accommodation = ""
 
 # variables used in print_allocation function
 room_name = ""
@@ -141,7 +143,8 @@ person_accommodate = ""
 
 
 def create_rooms(docopt_args):
-    """allows user to enter a list of room names"""
+    """allows user to enter a list of room names specifying
+        whether office or living spaces"""
 
     room = docopt_args.split(' ')
     room_type = raw_input(
@@ -152,7 +155,6 @@ def create_rooms(docopt_args):
             "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
     rooms = {room_type: room}
 
-    print rooms
     for key, values in rooms.iteritems():
         for value, index in enumerate(values):
             if key.upper() == "O":
@@ -179,20 +181,20 @@ def create_rooms(docopt_args):
                 connection.execute(
                     "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
         conn.commit()
+        return rooms
 
 
 def allocate(**kwargs):
+    """function allocates both staff & fellow office and only allocates 
+    fellow who want accommodation to living spaces """
     if kwargs['personnel_type'].upper() is 'STAFF' or 'FELLOW':
         connection.execute(
             "SELECT Name, capacity, available from Rooms where Room_type = \"O\"")
         for row in connection:
-            print(row)
-            spaces = row[2].split()
-            spaces = map(lambda x: x.encode('ascii'), spaces)
-            spaces = list(spaces)
+            spaces = row[2].encode('ascii').split(' ')
             for index, space in enumerate(spaces):
-                if '0' in space:
-                    spaces[index] = (' ').join(kwargs['name'])
+                if '0' == space:
+                    spaces[index] = kwargs['name']
                     new_spaces = (' ').join(str(item) for item in spaces)
                     connection.execute("UPDATE Rooms set available = ? where \
                                 Name = ?", (new_spaces, row[0]))
@@ -203,13 +205,11 @@ def allocate(**kwargs):
         connection.execute(
             "SELECT Name, capacity, available from Rooms where Room_type = 'L' ")
         for row in connection:
-            spaces = row[2].split()
-            spaces = map(lambda x: x.encode('ascii'), spaces)
-            spaces = list(spaces)
+            spaces = row[2].encode('ascii').split(' ')
         # if living space is empty
             for index, space in enumerate(spaces):
-                if '0' in space:
-                    spaces[index] = (' ').join(kwargs['name'])
+                if '0' == space:
+                    spaces[index] = kwargs['name']
                     new_spaces = (' ').join(str(item) for item in spaces)
                     connection.execute("UPDATE Rooms set available = ? where \
                                 Name = ?", (new_spaces, row[0]))
@@ -219,10 +219,11 @@ def allocate(**kwargs):
 
 def add_person(docopt_args):
     person = docopt_args.split(' ')
-    print person  # eg ['giant', 'gal', 'fellow', 'y']
-    name = person[:2]
+    # eg ['giant', 'gal', 'fellow', 'y']
+    name = person[0] + " " + person[1]
     personnel_type = person[2]
     want_accommodation = person[3]
+
     insert_db(name=name, personnel_type=personnel_type,
               want_accommodation=want_accommodation)
     allocate(name=name, personnel_type=personnel_type,
@@ -232,17 +233,10 @@ def add_person(docopt_args):
 
 
 def insert_db(**kwargs):
-    if personnel_type.upper() == "FELLOW":
+    if kwargs['personnel_type'].upper() is "FELLOW" or "STAFF":
         connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                           (str(name), str(personnel_type), str(want_accommodation)))
-    else:
-        connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                           (str(name), str(personnel_type), str('N')))
-    conn.commit()
-
-
-def query_db(**kwargs):
-    pass
+                           (str(kwargs['name']), str(kwargs['personnel_type']), str(kwargs['want_accommodation'])))
+        conn.commit()
 
 
 def reallocate_person(docopt_args):
@@ -252,9 +246,7 @@ def reallocate_person(docopt_args):
     connention.execute(
         "SELECT Name, capacity, available FROM Rooms where Room_type = 'L' or 'O'")
     for row in connection:
-        list_spaces = row[2].split(',')
-        list_spaces = map(lambda x: x.encode('ascii'),
-                          list_space)
+        list_spaces = row[2].encode('ascii').split(',')
         if name in list_spaces:
             exists = True
             break
@@ -294,8 +286,8 @@ def print_allocations(docopt_args):
         room_name = i[0]
         room_type = i[1]
         people_room = i[2]
-        puts(colored.red(room_name) + " " +
-             colored.white(room_type) + " " + colored.blue(people_room))
+        puts(colored.red(room_name) + "--------------------- "'\n' +
+             colored.white(room_type) + "--------------------- "'\n' + colored.blue(people_room))
         people_in_room.append(people_room)
 
         if len(allocate) > 0:

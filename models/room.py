@@ -10,7 +10,7 @@ class Office(Room):
     """office model has capacity of 6"""
     room_type = 'O'
     capacity = 6
-    available = ['0', '0', '0', '0', '0', '0']
+    available = "0 0 0 0 0 0"
 
     def __repr__(self):
 
@@ -22,7 +22,7 @@ class Living_space(Room):
     """Living_space model with a capacity of 4 """
     room_type = 'L'
     capacity = 4
-    available = ['0', '0', '0', '0']
+    available = "0 0 0 0"
 
     def __repr__(self):
         """this it is the dictionary format that will be printed"""
