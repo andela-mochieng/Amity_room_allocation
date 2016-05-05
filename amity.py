@@ -24,13 +24,11 @@ from util.File import fileParser
 from colorama import init, Back, Style  # Fore
 from docopt import docopt, DocoptExit
 # from pyfiglet import figlet_format
-# from db.dbase import DataManager
 import sqlite3
 from clint.textui import colored, puts
 from models.room import Office, Living_space
 import cmd
 import random
-import unicodedata
 
 conn = sqlite3.connect("amity.sqlite")
 connection = conn.cursor()
@@ -78,7 +76,8 @@ class Amity(cmd.Cmd):
         create_rooms(arg)
 
     def do_add_person(self, arg):
-        """Usage: add_person <person_fname> <person_lname>(FELLOW|STAFF)[--wants_accommodation]"""
+        """Usage: add_person <person_fname> <person_lname>(FELLOW|STAFF)
+        [--wants_accommodation=n]"""
 
         add_person(arg)
 
@@ -174,19 +173,26 @@ def create_rooms(docopt_args):
                                     living_data[i].available))
         if office_populate:
             for x in office_populate[0][0]:
-                connection.execute(
-                    "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(office_populate[0][1]), str(office_populate[0][2]), str(office_populate[0][3])))
+                state = "INSERT INTO Rooms VALUES {} {} {} {}".format(
+                    str(x), str(office_populate[0][1]),
+                    str(office_populate[0][2]),
+                    str(office_populate[0][3]))
+                connection.execute(state)
         else:
             for x in living_populate[0][0]:
-                connection.execute(
-                    "INSERT INTO Rooms VALUES (?, ?, ?, ?)", (str(x), str(living_populate[0][1]), str(living_populate[0][2]), str(living_populate[0][3])))
+                statement = "INSERT INTO Rooms VALUES {} {} {} {}".format(
+                    str(x), str(living_populate[0][1]),
+                    str(living_populate[0][2]),
+                    str(living_populate[0][3])
+                )
+                connection.execute(statement)
         conn.commit()
         return rooms
 
 
 def allocate(**kwargs):
-    """function allocates both staff & fellow office and only allocates 
-    fellow who want accommodation to living spaces """
+    """function allocates both staff & fellow office and only 
+    allocates fellow who want accommodation to living spaces """
     if kwargs['personnel_type'].upper() is 'STAFF' or 'FELLOW':
         connection.execute(
             "SELECT Name, capacity, available from Rooms where Room_type = \"O\"")
@@ -235,7 +241,8 @@ def add_person(docopt_args):
 def insert_db(**kwargs):
     if kwargs['personnel_type'].upper() is "FELLOW" or "STAFF":
         connection.execute("INSERT INTO Persons VALUES (?, ?, ?)",
-                           (str(kwargs['name']), str(kwargs['personnel_type']), str(kwargs['want_accommodation'])))
+                           (str(kwargs['name']), str(kwargs['personnel_type']),
+                            str(kwargs['want_accommodation'])))
         conn.commit()
 
 
@@ -280,16 +287,21 @@ def print_allocations(docopt_args):
     allocate = docopt_args.split(' ')
     connection.execute(
         "SELECT Name, Room_type, available from Rooms")
-    # (u'lilac', u'O', u'lions sheila kiura alex margie johns mtu mzima mtu mzima wacha tu')
+    """(u'lilac', u'O', u'lions sheila kiura alex margie 
+    johns mtu mzima mtu mzima wacha tu')"""
     for i in connection:
         i = map(lambda x: x.encode('ascii'), i)
         room_name = i[0]
         room_type = i[1]
         people_room = i[2]
-        puts(colored.red(room_name) + "--------------------- "'\n' +
-             colored.white(room_type) + "--------------------- "'\n' + colored.blue(people_room))
-        people_in_room.append(people_room)
+        print "-" * 30
+        puts(colored.red(room_name))
+        print "-" * 30
+        puts(colored.white(room_type))
+        print "-" * 3
+        puts(colored.blue(people_room))
 
+        people_in_room.append(people_room)
         if len(allocate) > 0:
             filename = allocate[-1]
             f = open(filename, 'a+')
@@ -313,7 +325,14 @@ def print_room(docopt_args):
 
 
 def print_unallocated(docopt_args):
+    people_org = []
     unallocate = docopt_args.split(' ')
+    connection.execute(
+        "SELECT available from Rooms")
+    for people_room in connection:
+        people_room = map(lambda x: x.encode('ascii'), people_room)
+        people_in_room.extend(people_room)
+    # print people_in_room
     connection.execute(
         "SELECT Name, Personel_type, want_accommodation from Persons")
     for name in connection:
@@ -321,18 +340,26 @@ def print_unallocated(docopt_args):
         person_name = name[0]
         person_type = name[1]
         person_accommodate = name[2]
-        if person_name != people_in_room:
-            puts(colored.red(person_name) + " " +
-                 colored.white(person_type) + " " + colored.blue(person_accommodate))
+        people_org.append(person_name)
+    # print people_org
+    # import ipdb
+    # ipdb.set_trace()
+    for name in people_org:
+        for names in people_in_room:
+            if name in names == False and person_accommodate.upper() is 'N':
+                puts(colored.white(person_name) + " " +
+                     colored.red(person_type) + " " +
+                     colored.blue(person_accommodate))
+    print "Everyone allocated"
 
-        if len(unallocate) > 0:
-            filename = unallocate[-1]
-            f = open(filename, 'a+')
-            newdata = person_name + "', '" + \
-                person_type + "', '" + person_accommodate + '\n'
-            f.write(newdata)
-        else:
-            print('No filename specificied')
+    if len(unallocate) > 0:
+        filename = unallocate[-1]
+        f = open(filename, 'a+')
+        newdata = person_name + "', '" + \
+            person_type + "', '" + person_accommodate + '\n'
+        f.write(newdata)
+    else:
+        print('No filename specificied')
 
 
 def save_file_path(path):
