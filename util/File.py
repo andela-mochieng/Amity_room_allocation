@@ -9,11 +9,13 @@ class fileParser(object):
         lines = [line.rstrip('\n') for line in open(self.file_path, 'r')]
         for line in lines:
             words = line.split(" ")
-            name = words[0].replace("'", "") + " " + words[1].replace("'", "")
+            name = words[0] + " " + words[1] + ','
             personnel_type = words[2]
-            want_accommodation = 'N'
             if len(words) == 4:
-                want_accommodation = 'Y'
+                want_accommodation = words[3]
+            else:
+                want_accommodation = 'N'
+
             allocations_list.append(
                 [name, personnel_type, want_accommodation])
         return allocations_list

@@ -1,16 +1,17 @@
 from Tkinter import Tk
 import tkFileDialog
 from util.File import fileParser
-from termcolor import cprint
+# from termcolor import cprint
 from colorama import init, Back, Style  # Fore
-from docopt import docopt, DocoptExit
-from pyfiglet import figlet_format
+# from docopt import docopt, DocoptExit
+# from pyfiglet import figlet_format
 import sqlite3
 from clint.textui import colored, puts
 from models.room import Office, Living_space
 import cmd
 import random
 import sys
+import ipdb
 
 office_data = []
 living_data = []
@@ -39,11 +40,11 @@ connection.execute(
     "CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
 
 
-def create_rooms(docopt_args):
+def create_rooms(args):
     """allows user to enter a list of room names specifying
         whether office or living spaces"""
 
-    room = docopt_args.split(' ')
+    room = [room for room in args['<room_name>']]
     room_type = raw_input(
         "Enter room type: \n O: Office space \n L: Living space: \n")
 
@@ -51,7 +52,7 @@ def create_rooms(docopt_args):
         room_type = raw_input(
             "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
     rooms = {room_type: room}
-
+    print rooms
     for key, values in rooms.iteritems():
         for value, index in enumerate(values):
             if key.upper() == "O":
@@ -94,6 +95,7 @@ def create_rooms(docopt_args):
 def allocate(**kwargs):
     """function allocates both staff & fellow office and only
     allocates fellow who want accommodation to living spaces """
+
     if kwargs['personnel_type'].upper() is 'STAFF' or 'FELLOW':
         connection.execute(
             "SELECT Name, capacity, available from Rooms where Room_type = \"O\"")
@@ -108,7 +110,7 @@ def allocate(**kwargs):
                     conn.commit()
                     break
 
-    if kwargs['want_accommodation'].upper() == 'Y':
+    if kwargs['want_accommodation'].lower() == '--o=y' or kwargs['want_accommodation'].lower() == 'y':
         connection.execute(
             "SELECT Name, capacity, available from Rooms where Room_type = 'L' ")
         for row in connection:
@@ -122,15 +124,15 @@ def allocate(**kwargs):
                                 Name = ?", (new_spaces, row[0]))
                     conn.commit()
                     break
+    else:
+        print "Fellow doesn't want accommodation"
 
 
-def add_person(docopt_args):
-    person = docopt_args.split(' ')
-    # eg ['giant', 'gal', 'fellow', 'y']
-    name = person[0] + " " + person[1] + ','
-    personnel_type = person[2]
-    want_accommodation = person[3]
-
+def add_person(args):
+    name = args['<person_fname>'] + " " + args['<person_lname>']
+    personnel_type = 'FELLOW' if args['FELLOW'] else 'STAFF'
+    want_accommodation = 'Y' if args[
+        '--wa'] is not None and args['--wa'].lower() == 'y' else 'N'
     insert_db(name=name, personnel_type=personnel_type,
               want_accommodation=want_accommodation)
     allocate(name=name, personnel_type=personnel_type,
@@ -147,22 +149,20 @@ def insert_db(**kwargs):
         conn.commit()
 
 
-def reallocate_person(docopt_args):
-    person_room = docopt_args.split(' ')
-    person = person_room[:2]
-    exists = False
-    connention.execute(
-        "SELECT Name, capacity, available FROM Rooms where Room_type = 'L' or 'O'")
-    for row in connection:
-        list_spaces = row[2].encode('ascii').split(',')
-        if name in list_spaces:
-            exists = True
-            break
-    if exists is False:
-        unallocated_persons.append(name)
+def reallocate_person(args):
+    fname = args.get('<person_fname>')
+    lname = args.get('<person_lname>')
+    reallocate_details = fname + " " + lname
+    connection.execute(
+        "DELETE from Rooms where available = ?", [reallocate_details])
+    room = args.get('<new_room_name>')
+    ipdb.set_trace()
+    connection.execute(
+        "UPDATE Rooms SET available = ? WHERE Name = ?",
+        [reallocate_details, room])
 
 
-def load_people(docopt_args):
+def load_people(args):
     load = Tk()
     load.withdraw()
     load.update()
@@ -183,42 +183,39 @@ def load_people(docopt_args):
                          want_accommodation=want_accommodation)
 
 
-def print_allocations(docopt_args):
+def print_allocations(args):
     """function screens data  from db to the cmdline and into a file """
-    allocate = docopt_args.split(' ')
-    print len(allocate)
-    # print allocate
-    print allocate[0]
     connection.execute(
         "SELECT Name, Room_type, available from Rooms")
-    """(u'lilac', u'O', u'lions sheila kiura alex margie
-    johns mtu mzima mtu mzima wacha tu')"""
-    for i in connection:
-        i = map(lambda x: x.encode('ascii'), i)
-        room_name = i[0]
-        room_type = i[1]
-        people_room = i[2]
+
+    for items in connection:
+        item = list(items)
+        item = map(lambda x: x.encode('ascii'), item)
+        room_name = item[0]
+        room_type = item[1]
+        people_room = item[2]
         print "-" * 30
         puts(colored.red(room_name))
         print "-" * 30
         puts(colored.white(room_type))
         print "-" * 3
         puts(colored.blue(people_room))
-
         people_in_room.append(people_room)
-        if len(allocate) > 0 and allocate[0] != '':
-            filename = allocate[-1]
+        file = args.get('--o')
+        if file != 'None':
+            filename = file
             f = open(filename, 'a+')
-            newdata = room_name + "', '" + \
-                room_type + "', '" + people_room + '\n'
+            newdata = "Room Name:" + room_name + ", " + \
+                " Room type:" + room_type + ", " + \
+                "Occupants: " + people_room + '\n'
             f.write(newdata)
         else:
             print('No filename specificied')
 
 
-def print_room(docopt_args):
+def print_room(args):
     """function prints out members of a room"""
-    room = docopt_args.split(' ')
+    room = args['<room_name>'].split(' ')
     connection.execute(
         "SELECT Name, available from Rooms where Name = ?", (room))
     for allocated in connection:
@@ -228,15 +225,16 @@ def print_room(docopt_args):
     print('No room with that name')
 
 
-def print_unallocated(docopt_args):
+def print_unallocated(args):
     people_org = []
-    unallocate = docopt_args.split(' ')
+
     connection.execute(
         "SELECT available from Rooms")
     for people_room in connection:
-        people_room = map(lambda x: x.encode('ascii'), people_room)
-        people_in_room.extend(people_room)
-    # print people_in_room
+        if people_room != (None,):
+            people_room = map(lambda x: x.encode('ascii'), people_room)
+            people_in_room.extend(people_room)
+        # print people_in_room
     connection.execute(
         "SELECT Name, Personel_type, want_accommodation from Persons")
     for name in connection:
@@ -245,9 +243,8 @@ def print_unallocated(docopt_args):
         person_type = name[1]
         person_accommodate = name[2]
         people_org.append(person_name)
-    # print people_org
-    # import ipdb
-    # ipdb.set_trace()
+    print people_org
+
     for name in people_org:
         for names in people_in_room:
             if name in names == False and person_accommodate.upper() is 'N':
@@ -256,11 +253,12 @@ def print_unallocated(docopt_args):
                      colored.blue(person_accommodate))
     print "Everyone allocated"
 
-    if len(unallocate) > 0:
-        filename = unallocate[-1]
+    file = args.get('--o')
+    if file != None:
+        filename = file
         f = open(filename, 'a+')
-        newdata = person_name + "', '" + \
-            person_type + "', '" + person_accommodate + '\n'
+        newdata = person_name + ", " + \
+            person_type + ", " + person_accommodate + '\n'
         f.write(newdata)
     else:
         print('No filename specificied')
@@ -271,7 +269,7 @@ def save_file_path(path):
         f.write(path)
 
 
-def load_state(docopt_args):
+def load_state(args):
     connection.execute("SELECT * FROM Rooms")
     print connection.fetchall()
     connection.execute("SELECT * FROM Persons")
@@ -280,6 +278,6 @@ def load_state(docopt_args):
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
-    cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
-    print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-          Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
+    # cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
+    # print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
+    # Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
