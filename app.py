@@ -1,10 +1,10 @@
 from Tkinter import Tk
 import tkFileDialog
 from util.File import fileParser
-# from termcolor import cprint
+from termcolor import cprint
 from colorama import init, Back, Style  # Fore
-# from docopt import docopt, DocoptExit
-# from pyfiglet import figlet_format
+from docopt import docopt, DocoptExit
+from pyfiglet import figlet_format
 import sqlite3
 from clint.textui import colored, puts
 from models.room import Office, Living_space
@@ -125,7 +125,7 @@ def allocate(**kwargs):
                     conn.commit()
                     break
     else:
-        print "Fellow doesn't want accommodation"
+        print "Fellow or staff not assigned living space "
 
 
 def add_person(args):
@@ -278,6 +278,6 @@ def load_state(args):
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
-    # cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
-    # print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-    # Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
+    cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
+    print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
+    Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
