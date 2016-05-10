@@ -1,4 +1,4 @@
-##Amity_room_allocation
+## Amity_room_allocation
 
 >This is a a console application allocate offices and living spaces at Amity to Andela employees.
 
@@ -8,7 +8,9 @@ $ https://github.com/margierain/Amity_room_allocation.git.
 ```
 
 2. Fetch from develop-branch
-`$ git checkout develop`
+```
+$ git checkout develop
+```
 
 3. Navigate to the root folder
 ```
