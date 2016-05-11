@@ -1,27 +1,35 @@
 import unittest
-from .. app import *
+from ..app import Amity
 import sqlite3
-from run import Amity
+
 conn = sqlite3.connect("amity.sqlite")
 connection = conn.cursor()
 
 
 class roomstest(unittest.TestCase):
-    def test_create_rooms(self):
-        # test whether rooms ares created and saved to the db
+    def setUp(self):
         amity = Amity()
 
-        args = {'<room_name>': ['lilac', 'shell']}
-        amity.do_create_rooms(args)
-    #     room.room_type = 'O' or 'L'
-    #     room.rooms = {room.room_type: room.room_list}
-    #     self.assertEqual(type(room.rooms), args)
+    def test_create_rooms(self):
+        ''' test whether rooms are created and saved to the dictionary'''
+        amity = Amity()
+        amity.create_rooms(['Lilac', 'Camelot', 'Oculus' ])
+        room_type = 'L'
+        self.rooms = {
+        'L': ['Lilac', 'Camelot', 'Oculus'],
+        'O':[]
+        }
+        self.assertEqual(len(self.rooms['L']), 3 )
+        self.assertEqual(len(self.rooms['O']), 2)
 
-    # def test_add_person(self):
-    #     args = {'<person_fname>': 'andrew',
-    #             '<person_lname>': 'mutembei', 'FELLOW': 'fellow', '--wa': 'y'}
-    #     person = add_person(args)
-    #     self.assertEqual(type(person), args)
+
+    def test_add_person(self):
+        add_person(['Margie'], ['Rain'], ['Fellow]', ['Y']])
+        self.assertTrue(name, 'Margie Rain')
+        self.assertTrue(person_type, 'Fellow')
+        self.assertTrue(want_accommodation, 'Y')
+
+        self.assertEqual(person_data, {'Fellow': {'Margie Rain': 'Y'} 'staff'}  )
 
     # def test_print_allocations(self):
     #     pass

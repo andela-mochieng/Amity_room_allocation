@@ -1,8 +1,8 @@
 """Amity room allocation application has the following
 Usage:
     Amity create_rooms <room_name>...
-    Amity add_person  <person_fname> <person_lname>(FELLOW|STAFF) [--wa=n]
-    Amity reallocate_person  <person_fname> <person_lname> <new_room_name>
+    Amity add_person  <first_fname> <last_name> <person_type> [--wa=n]
+    Amity reallocate_person  <first_fname> <last_name> <new_room_name>
     Amity load_people
     Amity print_allocations [--o=filename]
     Amity print_unallocated [--o=filename]
@@ -14,12 +14,14 @@ Options:
     -l, --launch  Launch the application.
     -h,--help  display a list of command to the user
 """
-
+import ipdb
 import sys
 import cmd
-from app import *
+from app import Amity, welcome_msg
 # from Room import Rooms, welcome_msg
 from docopt import docopt, DocoptExit
+
+amity = Amity()
 
 
 def parser_cmd(func):
@@ -54,7 +56,7 @@ def parser_cmd(func):
     return fn
 
 
-class Amity(cmd.Cmd):
+class Amity_function_call(cmd.Cmd):
     """ this class maps how input arguments
         are in relation to the methods """
 
@@ -63,15 +65,15 @@ class Amity(cmd.Cmd):
     @parser_cmd
     def do_create_rooms(self, arg):
         """Usage: create_rooms <room_name>..."""
-
-        create_rooms(arg)
+        amity.create_rooms(arg['<room_name>'])
 
     @parser_cmd
     def do_add_person(self, arg):
-        """Usage: add_person <person_fname> <person_lname>(FELLOW|STAFF)
+        """Usage: add_person <first_name> <last_name> <person_type>
         [--wa=n]"""
+        amity.add_person(arg['<first_name>'], arg['<last_name>'], arg['<person_type>'], arg['--wa'])
 
-        add_person(arg)
+
 
     @parser_cmd
     def do_reallocate_person(self, arg):
@@ -106,7 +108,7 @@ class Amity(cmd.Cmd):
     def do_load_state(self, arg):
         """Usage: load_state <sqlite_database>"""
 
-        load_state(arg)
+        amity.load_state(arg)
 
     def quit(self):
         self.root.destroy
@@ -121,6 +123,6 @@ opt = docopt(__doc__, sys.argv[1:])
 if opt['--launch']:
     """ start the application """
     welcome_msg()
-    Amity().cmdloop()
+    Amity_function_call().cmdloop()
 
 print(opt)
