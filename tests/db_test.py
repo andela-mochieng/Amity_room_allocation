@@ -10,7 +10,7 @@ class Dbase_centreTests(unittest.TestCase):
         # test if a cursor object is returned
         # after db connection
 
-        db = Dbase_centre('amity.sqlite')
+        db = Dbase_centre('test_amity.sqlite')
         query = "INSERT INTO Persons VALUES(?, ?, ? )"
         record = [("dummy name"), ("fellow"), ("y")]
         cur = db.query_db(query, record)

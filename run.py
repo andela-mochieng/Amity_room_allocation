@@ -71,6 +71,9 @@ class Amity_function_call(cmd.Cmd):
     def do_add_person(self, arg):
         """Usage: add_person <first_name> <last_name> <person_type>
         [--wa=n]"""
+        if type(arg['<first_name>']) != str or type(arg['<last_name>']) != str or type(arg['<person_type>']) != str:
+            raise ValueError
+
         amity.add_person(arg['<first_name>'], arg['<last_name>'], arg['<person_type>'], arg['--wa'])
 
 
