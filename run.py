@@ -77,8 +77,8 @@ class Amity_function_call(cmd.Cmd):
 
     @parser_cmd
     def do_reallocate_person(self, arg):
-        """Usage: reallocate_person <person_fname> <person_lname> <new_room_name>"""
-        reallocate_person(arg)
+        """Usage: reallocate_person <first_name> <last_name> <new_room_name>"""
+        reallocate_person(arg['<first_name>'], arg['<last_name>'], arg['<new_room_name>'])
 
     @parser_cmd
     def do_load_people(self, arg):

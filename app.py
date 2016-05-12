@@ -1,4 +1,5 @@
 from Tkinter import Tk
+from db import save
 import tkFileDialog
 from util.File import fileParser
 from termcolor import cprint
@@ -14,7 +15,7 @@ import sys
 import ipdb
 
 class Amity(object):
-
+    """Description for amity"""
     def __init__(self):
         # variable used in create_rooms
         self.rooms = {
@@ -25,10 +26,15 @@ class Amity(object):
         self.people_data = {'Staff':[],
         'Fellow':[{}]
         }
-        self.office_data = []
-        self.living_data = []
-        self.office_populate = []
-        self.living_populate = []
+        self.allocate ={
+        'O' : {' ':[]},
+        'L': {' ':[]}
+        }
+        # variable used in allocation
+        self.offices = []
+        self.full_name = []
+        self.allocated_room = []
+
         # variables used in add_person
         self.name = ""
         self.personnel_type = ""
@@ -43,15 +49,21 @@ class Amity(object):
         self.person_name = []
         self.person_type = ""
 
-        living_data = self.living_data
-        office_data = self.office_data
+        # used in create_rooms
+        self.save_data = save.Save_data()
+        save_data = self.save_data
 
         self.conn = sqlite3.connect("amity.sqlite")
-        self.connection = self.conn.cursor()
-        self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS Rooms(Name TEXT, Room_type TEXT, capacity integer, available TEXT)")
-        self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS Persons(Name TEXT, Personel_type TEXT, want_accommodation TEXT)")
+        self.connect = self.conn.cursor()
+        self.connect.execute(
+                "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, type TEXT, capacity integer)")
+
+        self.connect.execute(
+                "CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Personel_type TEXT, want_accommodation TEXT, office_accommodation TEXT , living_accomodation TEXT)")
+
+
+
+
 
 
     def create_rooms(self, room):
@@ -68,8 +80,20 @@ class Amity(object):
                 self.rooms[room_type.upper()].append(room_name)
             else:
                 self.rooms['L'].append(room_name)
-        print "Rooms successfully created"
+                ipdb.set_trace()
+            self.connect.execute("INSERT INTO Rooms (Name, type) VALUES (?, ?)", [room_name, room_type])
+            self.conn.commit()
+        return 'New rooms succesfully created'
         return self.rooms
+
+
+    def allocations(self):
+        ipdb.set_trace()
+        self.rooms
+        self.offices.append(self.rooms['O'])
+        print self.Offices
+        self.people_data
+        self.allocate
 
 
     def allocate(self, **kwargs):
@@ -110,6 +134,8 @@ class Amity(object):
 
 
     def add_person(self, first_name, last_name, person_type, want_housing):
+        if type(first_name) != str or type(last_name) != str or type(living_space) != str:
+            raise ValueError
         name = first_name + " " + last_name
         person_type = person_type
         want_accommodation = want_housing
@@ -117,13 +143,17 @@ class Amity(object):
             self.people_data['Staff'].append(name)
         else:
             self.people_data['Fellow'].append({name:want_accommodation})
+        #allocate rooms
+
 
         # insert_db(name=name, personnel_type=personnel_type,
         #           want_accommodation=want_accommodation)
         # allocate(name=name, personnel_type=personnel_type,
         #          want_accommodation=want_accommodation)
-        return self.person_data
+        return self.people_data
             # allocation of fellows to living_space
+
+
 
 
     def insert_db(self, **kwargs):
@@ -134,17 +164,19 @@ class Amity(object):
             conn.commit()
 
 
-    def reallocate_person(args):
-        fname = args.get('<person_fname>')
-        lname = args.get('<person_lname>')
-        reallocate_details = fname + " " + lname
-        connection.execute(
-            "DELETE from Rooms where available = ?", [reallocate_details])
-        room = args.get('<new_room_name>')
-        ipdb.set_trace()
-        connection.execute(
-            "UPDATE Rooms SET available = ? WHERE Name = ?",
-            [reallocate_details, room])
+    def reallocate_person(self, first_name, last_name, new_room_name):
+        self.full_name = first_name + " " + last_name
+        self.allocated_room = new_room_name
+
+
+
+        # connection.execute(
+        #     "DELETE from Rooms where available = ?", [reallocate_details])
+        # room = args.get('<new_room_name>')
+        # ipdb.set_trace()
+        # connection.execute(
+        #     "UPDATE Rooms SET available = ? WHERE Name = ?",
+        #     [reallocate_details, room])
 
 
     def load_people(args):

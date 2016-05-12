@@ -5,7 +5,7 @@
 **Clone this repo**
 
 ```shell
-git clone $ https://github.com/margierain/Amity_room_allocation.git.
+$ git clone  https://github.com/margierain/Amity_room_allocation.git.
 ````
 
 Fetch from develop-branch
