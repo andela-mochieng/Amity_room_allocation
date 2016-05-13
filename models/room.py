@@ -2,9 +2,10 @@
 class Room(object):
     """Room is the parent and Office and Living_space inherit from it"""
 
-    def __init__(self, name):
+    def __init__(self):
         """both Office and Living_space have access to name"""
-        self.name = name
+        pass
+
 
 
 class Office(Room):

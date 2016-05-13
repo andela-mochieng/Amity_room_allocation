@@ -2,7 +2,7 @@
 Usage:
     Amity create_rooms <room_name>...
     Amity add_person  <first_fname> <last_name> <person_type> [--wa=n]
-    Amity reallocate_person  <first_fname> <last_name> <new_room_name>
+    Amity reallocate_person <person_id> <new_room_name>
     Amity load_people
     Amity print_allocations [--o=filename]
     Amity print_unallocated [--o=filename]
@@ -74,20 +74,21 @@ class Amity_function_call(cmd.Cmd):
         if type(arg['<first_name>']) != str or type(arg['<last_name>']) != str or type(arg['<person_type>']) != str:
             raise ValueError
 
+        arg['--wa'] = 'Y' if arg['--wa'] is not None and arg['--wa'].upper() == 'Y' else 'N'
         amity.add_person(arg['<first_name>'], arg['<last_name>'], arg['<person_type>'], arg['--wa'])
 
 
 
     @parser_cmd
     def do_reallocate_person(self, arg):
-        """Usage: reallocate_person <first_name> <last_name> <new_room_name>"""
-        reallocate_person(arg['<first_name>'], arg['<last_name>'], arg['<new_room_name>'])
+        """Usage: reallocate_person  <person_id> <new_room_name>"""
+        amity.reallocate_person(arg['<person_id>'], arg['<new_room_name>'])
 
     @parser_cmd
     def do_load_people(self, arg):
         """Usage: load_person"""
 
-        load_people(arg)
+        amity.load_people(arg)
 
     @parser_cmd
     def do_print_allocations(self, arg):
