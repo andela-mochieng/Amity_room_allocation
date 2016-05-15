@@ -3,14 +3,15 @@ from ..app import Amity
 import sqlite3
 import ipdb
 
-conn = sqlite3.connect("test_amity.sqlite")
-connection = conn.cursor()
 
 
 class roomstest(unittest.TestCase):
     def setUp(self):
-
         self.amity = Amity()
+        self.conn = sqlite3.connect("test_amity.sqlite")
+        self.connect = conn.cursor()
+
+
 
     def test_create_rooms(self):
         ''' test whether rooms are created and saved to the dictionary'''
@@ -24,12 +25,16 @@ class roomstest(unittest.TestCase):
         self.assertEqual(len(self.rooms['O']), 0)
 
 
+
+
     def test_add_person(self):
         self.amity.add_person('Margie', 'Rain', 'Fellow', 'Y')
         self.name = 'Margie' + " " + 'Rain'
         self.assertEqual(self.name, 'Margie Rain')
         self.assertEqual(self.people_data, {'Fellow': {'Margie Rain': 'Y'} ,'Staff':[]})
         self.assertEqual(len(self.people_data['Staff']), 0)
+
+
 
     # def test_print_allocations(self):
     #     pass

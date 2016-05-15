@@ -1,16 +1,19 @@
-from Tkinter import Tk
+from __future__ import print_function
+import random
+import sqlite3
+import sys
 import tkFileDialog
-from util.File import fileParser
-from termcolor import cprint
+from Tkinter import Tk
+
+from clint.textui import colored, puts
 from colorama import init, Back, Style  # Fore
 from pyfiglet import figlet_format
-import sqlite3
-from clint.textui import colored, puts
+from termcolor import cprint
+
 from models.room import Office, Living_space
-import random
-import sys
+from util.File import FileParser
 import ipdb
-import random
+
 
 
 class Amity(object):
@@ -44,9 +47,9 @@ class Amity(object):
         want_accommodation = self.want_accommodation
 
         # variables used in print_allocation function
+        self.person_name = ""
+        self.person_type = ""
         self.room_name = ""
-        self.room_type = ""
-        self.people_room = ""
         self.people_in_room = []
         # variables used in print_allocation function
         self.person_name = []
@@ -61,6 +64,14 @@ class Amity(object):
         self.available_office = []
         self.available_housing = []
 
+        # data strutures in print_allocations
+        self.office_allocations = []
+        self.living_alllocations = []
+        self.office_occupants = []
+        self.unallocated_offices = []
+        self.living_occupants = []
+        self.unallocated_houses = []
+
         self.conn = sqlite3.connect("amity.sqlite")
         self.connect = self.conn.cursor()
         self.connect.execute(
@@ -71,7 +82,7 @@ class Amity(object):
 
     def create_rooms(self, room):
         """allows user to enter a list of room names specifying
-            whether office or living spaces"""
+                whether office or living spaces"""
         room_type = raw_input(
             "Enter room type: \n O: Office space \n L: Living space: \n")
 
@@ -106,12 +117,10 @@ class Amity(object):
             living_occupanted = liv_space[3]
         return living_occupanted
 
-
     def add_person(self, first_name, last_name, person_type, want_housing):
         name = first_name + " " + last_name
         person_type = person_type
         want_accommodation = want_housing
-
         if person_type.upper() == 'STAFF':
             self.people_data['Staff'].append(name)
         else:
@@ -120,13 +129,14 @@ class Amity(object):
         self.insert_db(name=name, person_type=person_type,
                        want_accommodation=want_accommodation)
         self.allocation_rule(name, person_type,
-                       want_accommodation)
+                             want_accommodation)
 
     def allocation_rule(self, name, person_type, want_accommodation):
         # to randomly allocate everyone an office
         office_name = self.connect.execute(
             "SELECT Name FROM Rooms where type = 'O'").fetchall()
         for off_name in office_name:
+            off_name = map(lambda x: x.encode('ascii'), off_name)
             if self.office_space_count(off_name) < self._office.capacity:
                 self.available_office.append(off_name)
                 office = random.choice(self.available_office)
@@ -134,53 +144,54 @@ class Amity(object):
                 # print self.office.capacity
                 self.allocate_office(name, office)
             else:
-                print name + "unallocated"
+
+                print (name + "unallocated")
         # randomly accomodate fellows who want accommodation
 
         if person_type.upper() == 'FELLOW' and want_accommodation == 'Y':
             living_name = self.connect.execute(
                 "SELECT Name FROM Rooms where type = 'L'").fetchall()
             for liv_name in living_name:
+                liv_name = map(lambda x: x.encode('ascii'), liv_name)
                 if self.living_space_count(liv_name) < self.living.capacity:
                     self.available_housing.append(liv_name)
                     housing = random.choice(self.available_housing)
                     self.allocate_housing(name, housing)
                 else:
-                    print " All livng spaces are full"
+                    print(" All livng spaces are full")
         else:
-            print "Fellow hasn't requested to be housed"
+            print("Personnel hasn't requested to be housed")
         # print self.people_data
         return self.people_data
             # allocation of fellows to living_space
 
     def insert_db(self, **kwargs):
         if kwargs['person_type'].upper() is "FELLOW" or "STAFF":
-            self.connect.execute("INSERT INTO Persons (Name, Personnel_type, want_accommodation) VALUES (?, ?, ?)",[kwargs['name'], kwargs['person_type'],
-                                  kwargs['want_accommodation']])
+            self.connect.execute("INSERT INTO Persons (Name, Personnel_type, want_accommodation) VALUES (?, ?, ?)", [kwargs['name'], kwargs['person_type'], kwargs['want_accommodation']])
             self.conn.commit()
 
     def allocate_office(self, person_name, office_name):
         """function allocates both staff & fellow office"""
         self.person_name = person_name
-        self.office_name = str(office_name)
+        self.office_name = str(office_name).strip('[').strip(']')
         # print self.office_name
-        # print self.person_name
-        # allocate offices
+        # print type(self.office_name)
+        # print type(self.person_name)
+        # # exit()
         allocate = self.connect.execute(
             "UPDATE Persons set office_accommodation = ? WHERE Persons.Name = ?", [self.office_name, self.person_name])
         self.conn.commit()
-        # print self.person_name + " successfully allocated to office: " + self.office_name
+        # print self.person_name + " successfully allocated to office: " +
+        # self.office_name
 
     def allocate_housing(self, name, housing):
         '''only allocates fellow who want accommodation to living spaces'''
         self.name = name
-        self.housing = str(housing)
+        self.housing = str(housing).strip('[').strip(']')
         allocate = self.connect.execute(
             "UPDATE Persons set living_accomodation = ? WHERE Persons.Name = ?", [self.housing, self.name])
         self.conn.commit()
-        print self.name + " successfully allocated to office: " + self.housing
-
-
+        print(self.name + " successfully allocated to office: " + self.housing)
 
     def reallocate_person(self, person_id, new_room_name):
         '''method searches the db for the personnel details, and the details of the new
@@ -197,21 +208,22 @@ class Amity(object):
         if person_allocate[0][5] != None:
             self.living_allocate = person_allocate[0][5]
             if new_room_name == self.living_allocate:
-                 print str(self._id) + "is already allocated to " + new_room_name
+                print(str(self._id) + "is already allocated to " + new_room_name)
 
         if new_room_name == self.office_allocate:
-            print str(self._id) + "is already allocated to " + new_room_name
+            print(str(self._id) + "is already allocated to " + new_room_name)
         room_to_move = self.connect.execute(
             "SELECT * FROM Rooms WHERE Rooms.Name = ?", [new_room_name]).fetchall()
-        print room_to_move
+        print(room_to_move)
         self.room_id = room_to_move[0][0]
         self.room_name = room_to_move[0][1]
         self.room_type = room_to_move[0][2]
         if self.room_type.upper() == 'O':
             # ipdb.set_trace()
-            self.connect.execute("UPDATE Persons set office_accommodation = ? WHERE Persons.id = ?", [self.room_name, self._id])
+            self.connect.execute("UPDATE Persons set office_accommodation = ? WHERE Persons.id = ?", [
+                                 self.room_name, self._id])
             self.conn.commit()
-            print self.person_name + " successfully reallocated to " + self.room_name
+            print(self.person_name + " successfully reallocated to " + self.room_name)
 
         if self.room_type.upper() == 'L':
             if self.person_type.upper() == 'FELLOW':
@@ -219,116 +231,126 @@ class Amity(object):
                     update_living = self.connect.execute(
                         "UPDATE Persons set living_accomodation = ? WHERE Persons.id = ?", [self.room_name, self._id])
                     self.conn.commit()
-                    print self.person_name + " successfully reallocated to " + self.room_name
+                    print(self.person_name + " successfully reallocated to " + self.room_name)
             else:
-                print self.person_name + " not reallocated to " + self.room_name
+                print(self.person_name + " not reallocated to " + self.room_name)
 
-    def load_people(args):
+    def load_people(self, *args):
         load = Tk()
         load.withdraw()
         load.update()
         file = tkFileDialog.askopenfile(
             parent=load, mode='rb', title="Load file")
         if file:
-            save_file_path(file.name)
-            parser = fileParser(file.name)
+            self.save_file_path(file.name)
+            parser = FileParser(file.name)
             input_data = parser.read_file()
             for lines in input_data:
-                print lines
+                print(lines)
                 if len(lines) > 2:
                     name = lines[0]
-                    personnel_type = lines[1]
+                    person_type = lines[1]
                     want_accommodation = lines[2]
-                    insert_db(name=name, personnel_type=personnel_type,
-                              want_accommodation=want_accommodation)
+                else:
+                    name = lines[0]
+                    person_type = lines[1]
+                    want_accommodation = "N"
+                    ipdb.set_trace()
+                self.insert_db(name=name, person_type=person_type,
+                               want_accommodation=want_accommodation)
+                self.allocation_rule(name, person_type, want_accommodation)
 
-    def print_allocations(args):
-        """function screens data  from db to the cmdline and into a file """
-        connection.execute(
-            "SELECT Name, type, office_accommodation from Persons")
+    def print_allocations(self, *args):
+        """function screens data from db to the cmdline and into a file """
 
-        for items in connection:
+        self.office_allocations = self.connect.execute(
+            "SELECT Persons.Name, Persons.Personnel_type, Persons.office_accommodation from Persons").fetchall()
+        self.living_allocations = self.connect.execute(
+            "SELECT Persons.Name, Persons.Personnel_type, Persons.living_accomodation from Persons ").fetchall()
+
+        for items in self.office_allocations:
             item = list(items)
-            item = map(lambda x: x.encode('ascii'), item)
-            room_name = item[0]
-            room_type = item[1]
-            people_room = item[2]
-            print "-" * 30
-            puts(colored.red(room_name))
-            print "-" * 30
-            puts(colored.white(room_type))
-            print "-" * 3
-            puts(colored.blue(people_room))
-            people_in_room.append(people_room)
-            file = args.get('--o')
-            if file != 'None':
-                filename = file
-                f = open(filename, 'a+')
-                newdata = "Room Name:" + room_name + ", " + \
-                    " Room type:" + room_type + ", " + \
-                    "Occupants: " + people_room + '\n'
-                f.write(newdata)
+            if item[2] != None:
+                item = map(lambda x: x.encode('ascii'), item)
+                self.office_occupants.append(item)
             else:
-                print('No filename specificied')
+                self.unallocated_offices.append(item)
 
-    def print_room(args):
-        """function prints out members of a room"""
-        room = args['<room_name>'].split(' ')
-        connection.execute(
-            "SELECT Name, available from Rooms where Name = ?", (room))
-        for allocated in connection:
-            allocated = map(lambda x: x.encode('ascii'),
-                            allocated)
-            return puts(colored.blue(allocated[1]))
-        print('No room with that name')
+        puts(colored.green('\n Below is list  of office personnel allocated offices: \n' ))
+        officed = [ occupant for occupant in self.office_occupants]
+        print('\n'.join(map(str, officed)))
 
-    def print_unallocated(args):
-        people_org = []
 
-        connection.execute(
-            "SELECT available from Rooms")
-        for people_room in connection:
-            if people_room != (None,):
-                people_room = map(lambda x: x.encode('ascii'), people_room)
-                people_in_room.extend(people_room)
-            # print people_in_room
-        connection.execute(
-            "SELECT Name, Personel_type, want_accommodation from Persons")
-        for name in connection:
-            name = map(lambda x: x.encode('ascii'), name)
-            person_name = name[0]
-            person_type = name[1]
-            person_accommodate = name[2]
-            people_org.append(person_name)
-        print people_org
+        for items in self.living_allocations:
+            item = list(items)
+            if items[2] != None:
+                item = map(lambda x: x.encode('ascii'), item)
+                self.living_occupants.append(item)
+            else:
+                self.unallocated_houses.append(items)
 
-        for name in people_org:
-            for names in people_in_room:
-                if name in names == False and person_accommodate.upper() is 'N':
-                    puts(colored.white(person_name) + " " +
-                         colored.red(person_type) + " " +
-                         colored.blue(person_accommodate))
-        print "Everyone allocated"
 
-        file = args.get('--o')
-        if file != None:
+        puts(colored.blue('\n Below is list of office personnel allocated houses: \n' ))
+        housed = [ living for living in self.living_occupants]
+        print('\n'.join(map(str, housed)))
+
+        file = args[0]['--o']
+        if file != 'None':
             filename = file
             f = open(filename, 'a+')
-            newdata = person_name + ", " + \
-                person_type + ", " + person_accommodate + '\n'
+            newdata = str(occupant)
+            newdata = str(living)
             f.write(newdata)
+            f.close()
         else:
             print('No filename specificied')
 
-    def save_file_path(path):
+
+
+    def print_unallocated(self, *args):
+        allocations = self.print_allocations()
+        unallocated = allocations. self.unallocated_offices
+        puts(colored.red('Below is list  of office personnel unallocated offices:' '\n' ))
+        for unallocated_offices in unallocated:
+            personnel_officeless = unallocated_offices
+        print('\n'.join(personnel_officeless))
+
+        liv_unallocated = allocations.self.unallocated_houses
+        puts(colored.green('Below is list of office personnel unallocated houses:' '\n' ))
+        for unallocated_houses in liv_unallocated:
+            personnel_unsheltered = unallocated_houses
+
+        print('\n'.join(personnel_unsheltered))
+
+
+        file = args[0]['--o']
+        if file != 'None':
+            filename = file
+            f = open(filename, 'a+')
+            newdata = str(unallocated_offices)
+            newdata = str(unallocated_houses)
+            f.write(newdata)
+            f.close()
+        else:
+            print('No filename specificied')
+
+    def print_room(self, room_name):
+        """function prints out members of a room"""
+        people_allocated = self.connect.execute(
+            "SELECT Persons.Name from Persons WHERE office_accommodation or living_accomodation = ?", [room_name]).fetchall()
+        print(str(people_allocated))
+
+    def save_file_path(self, path):
         with open("filePath", "w+") as f:
             f.write(path)
 
-    def load_state(args):
-        connection.execute("SELECT * FROM Rooms")
-        print connection.fetchall()
-        connection.execute("SELECT * FROM Persons")
-        print connection.fetchall()
+    def load_state(self, args):
+        puts(colored.green(" Data stored in the Rooms's table"))
+        room_state = self.connect.execute("SELECT * FROM Rooms").fetchall()
+        print('\n'.join(map(str, room_state)))
+        puts(colored.blue(" Data stored in the Persons's table"))
+        living_state = self.connect.execute("SELECT * FROM Persons").fetchall()
+        print('\n'.join(map(str, living_state)))
 
 
 def welcome_msg():

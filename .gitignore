@@ -3,3 +3,4 @@
 .sqlite
 .coverage
 .db
+.idea

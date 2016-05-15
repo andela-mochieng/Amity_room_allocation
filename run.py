@@ -85,28 +85,27 @@ class Amity_function_call(cmd.Cmd):
         amity.reallocate_person(arg['<person_id>'], arg['<new_room_name>'])
 
     @parser_cmd
-    def do_load_people(self, arg):
-        """Usage: load_person"""
+    def do_load_people(self, *args):
+        """Usage: load_people"""
+        amity.load_people(*args)
 
-        amity.load_people(arg)
-
-    @parser_cmd
-    def do_print_allocations(self, arg):
-        """Usage: print_allocations [--o=allocations.txt]"""
-
-        print_allocations(arg)
 
     @parser_cmd
-    def do_print_unallocated(self, arg):
+    def do_print_allocations(self, *arg):
+        """Usage: print_allocations [--o=filename.txt]"""
+        amity.print_allocations(*arg)
+
+
+    @parser_cmd
+    def do_print_unallocated(self, *arg):
         """Usage: print_unallocated [--o=filename]"""
-
-        print_unallocated(arg)
+        amity.print_unallocated(*arg)
 
     @parser_cmd
     def do_print_room(self, arg):
         """Usage: print_room <room_name>"""
 
-        print_room(arg)
+        amity.print_room(arg['<room_name>'])
 
     @parser_cmd
     def do_load_state(self, arg):
