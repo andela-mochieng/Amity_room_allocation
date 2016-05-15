@@ -4,3 +4,4 @@
 .coverage
 *.db
 .idea
+.coveragerc

@@ -6,7 +6,7 @@ install:
   - pip install coveralls
 env:
   - DB=sqlite
-script: nosetests --with-coverage
-
+script:
+  - nosetests --with-coverage
 after_success:
  - coveralls

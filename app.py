@@ -140,11 +140,8 @@ class Amity(object):
             if self.office_space_count(off_name) < self._office.capacity:
                 self.available_office.append(off_name)
                 office = random.choice(self.available_office)
-                # print len(self.office_space_count())
-                # print self.office.capacity
                 self.allocate_office(name, office)
             else:
-
                 print (name + "unallocated")
         # randomly accomodate fellows who want accommodation
 
