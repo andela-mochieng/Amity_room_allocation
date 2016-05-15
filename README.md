@@ -1,19 +1,28 @@
 ##Amity Room Allocation
 
-**Clone this repo**
+>This is a a console application allocate offices and living spaces at Amity to Andela employees.
 
+**__Clone this repo__**
 ```shell
-$ git clone  https://github.com/margierain/Amity_room_allocation.git.
-````
+$ https://github.com/margierain/Amity_room_allocation.git.
+```
 
-Fetch from develop-branch
-```shell
+**__Fetch from develop-branch__**
+
+```
 $ git checkout develop
 ```
 
-Navigate to the root folder
+**__Navigate to the root folder__**
+```shell
+$ cd Amity_room_allocation
+```
 
-Install packages required
+**__Install packages required__**
+```shell
+$ pip install  -r requirements.txt
+```
+
 
 ## Launching the program
 ```shell
@@ -34,6 +43,10 @@ $ (Amity)add_person  <person_fname> <person_lname>(FELLOW|STAFF) [--wa=n]
 ```
 
 ##### Command to reallocate person from one room to another
+
+```shell
+$ (Amity) reallocate_person  <person_fname> <person_lname> <new_room_name>
+```
 
 ##### Enables user to load people from a file to a db
 ```shell
@@ -62,8 +75,9 @@ $ (Amity) load_state <amity.sqlite>
 ```
 
 ###### Get a review of all the comands
+```shell
+$ (Amity) (-h | --help)
 ```
-$ (Amity) (-h | --help)```
 
 
 
