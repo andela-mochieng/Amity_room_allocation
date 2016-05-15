@@ -9,7 +9,10 @@ class roomstest(unittest.TestCase):
     def setUp(self):
         self.amity = Amity()
         self.conn = sqlite3.connect("test_amity.sqlite")
-        self.connect = conn.cursor()
+        self.connect = self.conn.cursor()
+        self.connect.execute(
+            "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, type TEXT)")
+
 
 
 
@@ -30,7 +33,9 @@ class roomstest(unittest.TestCase):
     def test_add_person(self):
         self.amity.add_person('Margie', 'Rain', 'Fellow', 'Y')
         self.name = 'Margie' + " " + 'Rain'
+
         self.assertEqual(self.name, 'Margie Rain')
+        self.person_type
         self.assertEqual(self.people_data, {'Fellow': {'Margie Rain': 'Y'} ,'Staff':[]})
         self.assertEqual(len(self.people_data['Staff']), 0)
 
