@@ -97,8 +97,8 @@ class Amity(object):
             self.connect.execute(
                 "INSERT INTO Rooms (Name, type) VALUES (?, ?)", [room_name, room_type])
             self.conn.commit()
-        return 'New rooms succesfully created'
-        return self.rooms
+        print('New rooms succesfully created')
+
 
     def office_space_count(self, off_name):
         ''' keep track of offices allocated'''
@@ -174,15 +174,11 @@ class Amity(object):
         """function allocates both staff & fellow office"""
         self.person_name = person_name
         self.office_name = str(office_name).strip('[').strip(']')
-        # print self.office_name
-        # print type(self.office_name)
-        # print type(self.person_name)
-        # # exit()
+
         allocate = self.connect.execute(
             "UPDATE Persons set office_accommodation = ? WHERE Persons.Name = ?", [self.office_name, self.person_name])
         self.conn.commit()
-        # print self.person_name + " successfully allocated to office: " +
-        # self.office_name
+
 
     def allocate_housing(self, name, housing):
         '''only allocates fellow who want accommodation to living spaces'''
@@ -191,7 +187,7 @@ class Amity(object):
         allocate = self.connect.execute(
             "UPDATE Persons set living_accomodation = ? WHERE Persons.Name = ?", [self.housing, self.name])
         self.conn.commit()
-        print(self.name + " successfully allocated to office: " + self.housing)
+        print(self.name + " successfully allocated to house: " + self.housing)
 
     def reallocate_person(self, person_id, new_room_name):
         '''method searches the db for the personnel details, and the details of the new
@@ -255,7 +251,6 @@ class Amity(object):
                     name = lines[0]
                     person_type = lines[1]
                     want_accommodation = "N"
-                    ipdb.set_trace()
                 self.insert_db(name=name, person_type=person_type,
                                want_accommodation=want_accommodation)
                 self.allocation_rule(name, person_type, want_accommodation)
