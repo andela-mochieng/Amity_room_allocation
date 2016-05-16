@@ -71,6 +71,11 @@ class Amity(object):
         self.unallocated_offices = []
         self.living_occupants = []
         self.unallocated_houses = []
+        self.office = []
+        self.housing = []
+        # variable in count
+        self.living_occupied = 0
+        self.office_occupied = 0
 
         self.conn = sqlite3.connect("amity.sqlite")
         self.connect = self.conn.cursor()
@@ -102,20 +107,26 @@ class Amity(object):
 
     def office_space_count(self, off_name):
         ''' keep track of offices allocated'''
+        off_name = str(off_name)
         office_space = self.connect.execute(
-            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS office_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.office_accommodation WHERE Rooms.type='O' GROUP BY Rooms.Name"
-        ).fetchall()
+            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS office_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.office_accommodation WHERE Rooms.Name = ?", [off_name]).fetchall()
         for off_space in office_space:
-            office_occupanted = off_space[3]
-        return office_occupanted
+            self.office_occuppied = off_space[3]
+            print(self.office_occuppied)
+        return self.office_occuppied
+
 
     def living_space_count(self, liv_name):
         '''keep track of living space allocated'''
+        liv_name = str(liv_name)
         living_space = self.connect.execute(
-            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS living_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.living_accomodation WHERE Rooms.type='L' GROUP BY Rooms.Name").fetchall()
+            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS living_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.living_accomodation WHERE Rooms.Name = ?", [liv_name]).fetchall()
         for liv_space in living_space:
-            living_occupanted = liv_space[3]
-        return living_occupanted
+            self.living_occuppied = liv_space[3]
+
+            print(liv_space )
+        return self.living_occuppied
+
 
     def add_person(self, first_name, last_name, person_type, want_housing):
         name = first_name + " " + last_name
@@ -133,29 +144,38 @@ class Amity(object):
 
     def allocation_rule(self, name, person_type, want_accommodation):
         # to randomly allocate everyone an office
+        # ipdb.set_trace()
         office_name = self.connect.execute(
             "SELECT Name FROM Rooms where type = 'O'").fetchall()
         for off_name in office_name:
             off_name = map(lambda x: x.encode('ascii'), off_name)
-            if self.office_space_count(off_name) < self._office.capacity:
-                self.available_office.append(off_name)
-                office = random.choice(self.available_office)
-                self.allocate_office(name, office)
-            else:
-                print (name + "unallocated")
+
+        # print(self.office_space_count.self.office_occupanted(off_name))
+        off_occupied = self.office_space_count(off_name)
+        if off_occupied < self._office.capacity:
+            self.available_office.append(off_name)
+            self.office = random.choice(self.available_office)
+        else:
+            print (name + "unallocated")
         # randomly accomodate fellows who want accommodation
+
+        if self.office:
+            self.allocate_office(name, self.office)
 
         if person_type.upper() == 'FELLOW' and want_accommodation == 'Y':
             living_name = self.connect.execute(
                 "SELECT Name FROM Rooms where type = 'L'").fetchall()
             for liv_name in living_name:
                 liv_name = map(lambda x: x.encode('ascii'), liv_name)
-                if self.living_space_count(liv_name) < self.living.capacity:
+                liv_occupied = self.living_space_count(liv_name)
+                if liv_occupied  < self.living.capacity:
                     self.available_housing.append(liv_name)
-                    housing = random.choice(self.available_housing)
-                    self.allocate_housing(name, housing)
+                    self.housing = random.choice(self.available_housing)
+
                 else:
                     print(" All livng spaces are full")
+            if self.housing:
+                self.allocate_housing(name, self.housing)
         else:
             print("Personnel hasn't requested to be housed")
         # print self.people_data
@@ -175,6 +195,7 @@ class Amity(object):
         allocate = self.connect.execute(
             "UPDATE Persons set office_accommodation = ? WHERE Persons.Name = ?", [self.office_name, self.person_name])
         self.conn.commit()
+        print(self.person_name + " successfully allocated to office: " + self.office_name)
 
 
     def allocate_housing(self, name, housing):
@@ -212,7 +233,6 @@ class Amity(object):
         self.room_name = room_to_move[0][1]
         self.room_type = room_to_move[0][2]
         if self.room_type.upper() == 'O':
-            # ipdb.set_trace()
             self.connect.execute("UPDATE Persons set office_accommodation = ? WHERE Persons.id = ?", [
                                  self.room_name, self._id])
             self.conn.commit()
@@ -290,8 +310,8 @@ class Amity(object):
         if file != 'None':
             filename = file
             f = open(filename, 'a+')
-            newdata = str(occupant)
-            newdata = str(living)
+            newdata = str(officed)
+            newdata = str(housed)
             f.write(newdata)
             f.close()
         else:
@@ -319,8 +339,8 @@ class Amity(object):
         if file != 'None':
             filename = file
             f = open(filename, 'a+')
-            newdata = str(unallocated_offices)
-            newdata = str(unallocated_houses)
+            newdata = str(personnel_officeless)
+            newdata = str( personnel_unsheltered)
             f.write(newdata)
             f.close()
         else:

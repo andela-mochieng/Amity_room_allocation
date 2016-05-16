@@ -1,5 +1,7 @@
 import unittest
-from ..app import Amity
+from Amity_room_allocation.app import Amity
+from main.app import Amity
+
 import sqlite3
 import os
 
