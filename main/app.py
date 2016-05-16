@@ -109,9 +109,9 @@ class Amity(object):
         ''' keep track of offices allocated'''
         off_name = str(off_name)
         office_space = self.connect.execute(
-            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS office_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.office_accommodation WHERE Rooms.Name = ?", [off_name]).fetchall()
+            "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [off_name]).fetchall()
         for off_space in office_space:
-            self.office_occuppied = off_space[3]
+            self.office_occuppied = off_space
             print(self.office_occuppied)
         return self.office_occuppied
 
@@ -120,9 +120,9 @@ class Amity(object):
         '''keep track of living space allocated'''
         liv_name = str(liv_name)
         living_space = self.connect.execute(
-            "SELECT Rooms.id, Rooms.Name, Rooms.type, COUNT(*) AS living_occupants FROM Rooms LEFT JOIN Persons ON Rooms.Name = Persons.living_accomodation WHERE Rooms.Name = ?", [liv_name]).fetchall()
+            "SELECT COUNT(*) AS living_occupants FROM Persons WHERE Persons.living_accomodation = ?", [liv_name]).fetchall()
         for liv_space in living_space:
-            self.living_occuppied = liv_space[3]
+            self.living_occuppied = liv_space
 
             print(liv_space )
         return self.living_occuppied
