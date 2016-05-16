@@ -18,7 +18,6 @@ import ipdb
 import sys
 import cmd
 from main.app import Amity, welcome_msg
-# from Room import Rooms, welcome_msg
 from docopt import docopt, DocoptExit
 
 amity = Amity()

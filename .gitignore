@@ -6,3 +6,4 @@
 .idea
 .coveragerc
 .DS_Store
+*.txt

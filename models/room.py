@@ -1,10 +1,15 @@
-
+import ipdb
 class Room(object):
     """Room is the parent and Office and Living_space inherit from it"""
 
-    def __init__(self):
-        """both Office and Living_space have access to name"""
-        pass
+    def __init__(self, connection):
+        self.connect = connection
+        #self.name = name
+
+    def is_room_filled(self, room_name):
+        count = self.connect.execute(
+            "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [str(room_name)]).fetchall()
+        return count[0][0] > self.capacity
 
 
 class Office(Room):
