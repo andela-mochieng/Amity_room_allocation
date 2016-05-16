@@ -13,7 +13,7 @@ class Office(Room):
     capacity = 6
 
 
-class Living_space(Room):
+class LivingSpace(Room):
     """Living_space model with a capacity of 4 """
     room_type = 'L'
     capacity = 4

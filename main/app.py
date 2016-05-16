@@ -10,7 +10,7 @@ from colorama import init, Back, Style  # Fore
 from pyfiglet import figlet_format
 from termcolor import cprint
 
-from models.room import Office, Living_space
+from models.room import Office, LivingSpace
 from util.File import FileParser
 import ipdb
 
@@ -33,11 +33,6 @@ class Amity(object):
             'O': {' ': []},
             'L': {' ': []}
         }
-        # variable used in allocation
-        self.offices = []
-        self.full_name = []
-        self.allocated_room = []
-
         # variables used in add_person
         self.name = ""
         name = self.name
@@ -45,6 +40,10 @@ class Amity(object):
         personnel_type = self.personnel_type
         self.want_accommodation = ""
         want_accommodation = self.want_accommodation
+        # variable used in allocation
+        self.offices = []
+        self.full_name = []
+        self.allocated_room = []
 
         # variables used in print_allocation function
         self.person_name = ""
@@ -57,7 +56,7 @@ class Amity(object):
 
         # uded in add_person
         self._office = Office()
-        self.living = Living_space()
+        self.living = LivingSpace()
         self.offices = []
         self.housing = []
         # reallocation variables
@@ -76,6 +75,7 @@ class Amity(object):
         # variable in count
         self.living_occupied = 0
         self.office_occupied = 0
+
 
         self.conn = sqlite3.connect("amity.sqlite")
         self.connect = self.conn.cursor()
@@ -110,22 +110,21 @@ class Amity(object):
         off_name = str(off_name)
         office_space = self.connect.execute(
             "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [off_name]).fetchall()
-        for off_space in office_space:
-            self.office_occuppied = off_space
-            print(self.office_occuppied)
-        return self.office_occuppied
+        self.office_occupied = office_space[0][0]
+        print(self.office_occupied)
+
+        return self.office_occupied
 
 
     def living_space_count(self, liv_name):
         '''keep track of living space allocated'''
-        liv_name = str(liv_name)
+        # print(liv_name)
         living_space = self.connect.execute(
             "SELECT COUNT(*) AS living_occupants FROM Persons WHERE Persons.living_accomodation = ?", [liv_name]).fetchall()
         for liv_space in living_space:
-            self.living_occuppied = liv_space
-
-            print(liv_space )
-        return self.living_occuppied
+            self.living_occupied = liv_space[0]
+            print(self.living_occupied)
+        return self.living_occupied
 
 
     def add_person(self, first_name, last_name, person_type, want_housing):
@@ -139,25 +138,27 @@ class Amity(object):
 
         self.insert_db(name=name, person_type=person_type,
                        want_accommodation=want_accommodation)
+
         self.allocation_rule(name, person_type,
                              want_accommodation)
 
     def allocation_rule(self, name, person_type, want_accommodation):
-        # to randomly allocate everyone an office
-        # ipdb.set_trace()
+        '''to randomly allocate everyone an office'''
         office_name = self.connect.execute(
             "SELECT Name FROM Rooms where type = 'O'").fetchall()
         for off_name in office_name:
-            off_name = map(lambda x: x.encode('ascii'), off_name)
+            off_name = off_name[0]
+            ipdb.set_trace()
+            office_occupied = self.office_space_count(off_name)
 
-        # print(self.office_space_count.self.office_occupanted(off_name))
-        off_occupied = self.office_space_count(off_name)
-        if off_occupied < self._office.capacity:
-            self.available_office.append(off_name)
-            self.office = random.choice(self.available_office)
-        else:
-            print (name + "unallocated")
-        # randomly accomodate fellows who want accommodation
+            if office_occupied < self._office.capacity:
+                print(office_occupied)
+
+                self.available_office.append(off_name)
+                self.office = random.choice(self.available_office)
+            else:
+                print (name + " unallocated")
+
 
         if self.office:
             self.allocate_office(name, self.office)
@@ -166,14 +167,13 @@ class Amity(object):
             living_name = self.connect.execute(
                 "SELECT Name FROM Rooms where type = 'L'").fetchall()
             for liv_name in living_name:
-                liv_name = map(lambda x: x.encode('ascii'), liv_name)
+                liv_name = liv_name[0]
                 liv_occupied = self.living_space_count(liv_name)
-                if liv_occupied  < self.living.capacity:
-                    self.available_housing.append(liv_name)
-                    self.housing = random.choice(self.available_housing)
-
-                else:
-                    print(" All livng spaces are full")
+            if liv_occupied  < self.living.capacity:
+                self.available_housing.append(liv_name)
+                self.housing = random.choice(self.available_housing)
+            else:
+                print(" All living spaces are full")
             if self.housing:
                 self.allocate_housing(name, self.housing)
         else:
@@ -190,7 +190,7 @@ class Amity(object):
     def allocate_office(self, person_name, office_name):
         """function allocates both staff & fellow office"""
         self.person_name = person_name
-        self.office_name = str(office_name).strip('[').strip(']')
+        self.office_name = str(office_name).strip('[').strip(']').strip("'").strip("'")
 
         allocate = self.connect.execute(
             "UPDATE Persons set office_accommodation = ? WHERE Persons.Name = ?", [self.office_name, self.person_name])
@@ -201,7 +201,7 @@ class Amity(object):
     def allocate_housing(self, name, housing):
         '''only allocates fellow who want accommodation to living spaces'''
         self.name = name
-        self.housing = str(housing).strip('[').strip(']')
+        self.housing = str(housing).strip('[').strip(']').strip("'").strip("'")
         allocate = self.connect.execute(
             "UPDATE Persons set living_accomodation = ? WHERE Persons.Name = ?", [self.housing, self.name])
         self.conn.commit()
@@ -261,7 +261,7 @@ class Amity(object):
             for lines in input_data:
                 print(lines)
                 if len(lines) > 2:
-                    name = lines[0]
+                    name = lines[0].strip(',')
                     person_type = lines[1]
                     want_accommodation = lines[2]
                 else:
@@ -310,8 +310,8 @@ class Amity(object):
         if file != 'None':
             filename = file
             f = open(filename, 'a+')
-            newdata = str(officed)
-            newdata = str(housed)
+            # newdata = '\n'.join(map(str, officed))
+            newdata = '\n'.join(map(str, housed)) + '\n' + '\n'.join(map(str, officed))
             f.write(newdata)
             f.close()
         else:
