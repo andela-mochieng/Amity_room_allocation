@@ -10,9 +10,10 @@ from colorama import init, Back, Style  # Fore
 from pyfiglet import figlet_format
 from termcolor import cprint
 
-from models.room import Office, LivingSpace
-from util.File import FileParser
+from .models.room import Office, LivingSpace
+from .util.File import FileParser
 import ipdb
+
 
 
 class Amity(object):
@@ -51,7 +52,6 @@ class Amity(object):
 
         self.person_name = []
         self.person_type = ""
-
 
         self.offices = []
         self.housing = []
@@ -138,17 +138,16 @@ class Amity(object):
         return self.connect.execute(
             "SELECT Name FROM Rooms where type = '" + r_type + "'").fetchall()
 
+
     def allocation_rule(self, name, person_type, want_accommodation):
         '''to randomly allocate everyone an office'''
         office_rooms = self.get_rooms('O')
         for office_room in office_rooms:
             room = Office(self.connect)
             office_name = office_room[0]
-            #office_occupied = self.office_space_count(off_name)
 
             if not room.is_room_filled(office_name):
                 self.available_office.append(office_name)
-                #self.office = random.choice(self.available_office)
 
         self.office = random.choice(self.available_office)
         if self.office:
@@ -172,7 +171,6 @@ class Amity(object):
                 print("No living space available")
         else:
             print("Personnel hasn't requested to be housed")
-
 
     def insert_db(self, **kwargs):
         if kwargs['person_type'].upper() is "FELLOW" or "STAFF":
@@ -273,43 +271,40 @@ class Amity(object):
                 self.allocation_rule(name, person_type, want_accommodation)
 
     def get_allocations(self, condition):
-        return self.connect.execute("SELECT * from Persons where " + condition).fetchall()
+        return self.connect.execute("SELECT Persons.Name, Persons.office_accommodation, Persons.living_accomodation from Persons where " + condition).fetchall()
+
 
     def print_allocations(self, *args):
         """function screens data from db to the cmdline and into a file """
-        allocations = self.get_allocations('office_accommodation not null or living_accomodation not null')
+        allocations = self.get_allocations(
+            'office_accommodation = ? or living_accomodation = ?,  ')
         file = args[0]['--o']
         if file:
             filename = file
-            with open(filename,'a+') as f:
+            with open(filename, 'a+') as f:
                 for row in allocations:
                     record = map(str, list(row))
                     f.write('\n' + ' '.join(record))
         else:
-            puts(colored.green('\n Below is list  of office personnel allocated offices: \n'))
+            puts(colored.green(
+                '\n Below is list  of office personnel allocated to rooms: \n'))
             for row in allocations:
                 print(map(str, list(row)))
 
     def print_unallocated(self, *args):
-        unallocations = self.get_allocations('office_accommodation null or living_accomodation null')
-        print('\n'.join(personnel_unsheltered))
-
-        file = args[0]['--o']
-        if file:
-            filename = file
-            f = open(filename, 'a+')
-            newdata = str(personnel_officeless)
-            newdata = str(personnel_unsheltered)
-            f.write(newdata)
-            f.close()
-        else:
-            print('No filename specificied')
+        unallocated = self.get_allocations(
+            'office_accommodation is null or living_accomodation is null')
+        print(unallocated)
 
     def print_room(self, room_name):
         """function prints out members of a room"""
-        people_allocated = self.connect.execute(
-            "SELECT Persons.Name from Persons WHERE office_accommodation or living_accomodation = ?", [room_name]).fetchall()
-        print(str(people_allocated))
+        people_allocated  = self.connect.execute(
+            "SELECT Name FROM Persons where office_accommodation = '" + room_name + "' or living_accomodation = '" + room_name + "'").fetchall()
+        print("The following are allocated to " + room_name)
+        print("-" * 30)
+        print((' ').join(map(lambda p: str(p[0]), people_allocated)))
+
+
 
     def save_file_path(self, path):
         with open("filePath", "w+") as f:

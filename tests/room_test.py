@@ -1,9 +1,9 @@
 import unittest
-from Amity_room_allocation.app import Amity
-from main.app import Amity
-
+from ..main.app import Amity
 import sqlite3
+
 import os
+
 
 
 class roomstest(unittest.TestCase):
@@ -23,15 +23,6 @@ class roomstest(unittest.TestCase):
         self.people_data = {'Staff': [],
                             'Fellow': []
                             }
-
-    def test_create_rooms(self):
-        ''' test whether rooms are created and saved to the dictionary'''
-        rooms = ['Ruby', 'Emerald', 'Java']
-        self.amity.create_rooms(rooms)
-        self.assertEqual(self.amity.create_rooms.room_type.upper(), 'L' or 'O')
-        self.assertEqual(len(self.amity.create_rooms.self.rooms['L']), 3)
-        self.assertEqual(len(self.amity.create_rooms.self.rooms['O']), 0)
-        self.assertEqual(type(self.amity.create_rooms.self.connect), sqlite3.Cursor)
 
 
     def test_add_person(self):
@@ -61,43 +52,47 @@ class roomstest(unittest.TestCase):
             off_name = map(lambda x: x.encode('ascii'), off_name)
             self.assertTrue(type(off_name), "Ruby")
 
-    def test_load_people(self):
-        amity.load_people(self, *args)
-        files_path = amity.self.save_file_path(self, path)
-        file_path = files_path.read_file()
-        self.assertEqual(len(file_path), 1)
-        parser = File.FileParser(
-            os.path.dirname(os.path.realpath("load_data.txt")))
-        list_allocations = parser.read_file()
-        self.assertEqual(len(list_allocations), 7)
+    # def test_load_people(self):
+    #     amity.load_people(self, *args)
+    #     files_path = amity.self.save_file_path(self, path)
+    #     file_path = files_path.read_file()
+    #     self.assertEqual(len(file_path), 1)
+    #     parser = File.FileParser(
+    #         os.path.dirname(os.path.realpath("load_data.txt")))
+    #     list_allocations = parser.read_file()
+    #     self.assertEqual(len(list_allocations), 7)
 
-    def test_living_space_count(self):
-        self.assertEqual(type(self.amity.living_space_count.living_occupanted), 3)
+    # def test_living_space_count(self):
+    #     self.assertEqual(type(self.amity.living_space_count.living_occupanted), 3)
 
-    # def test_allocate_office(self):
-    #     self.assertEqual(type(self.amity.reallocate_person.person_allocate, None))
-    #     self.assertEqual(self.amity.reallocate_person.new_room_name, self.amity.reallocate_person.self.living_allocate)
-
-
-
-    # def test_reallocate_person(self):
-    #     pass
-
-    def test_print_allocations(self):
-        self.amity.print_allocations(self, *args)
-        self.assertEqual(type(self.amity.self.print_allocations.office_occupants) > list)
-        self.assertEqual(len(self.amity.self.print_allocations.living_occupants) > 1)
+    # # def test_allocate_office(self):
+    # #     self.assertEqual(type(self.amity.reallocate_person.person_allocate, None))
+    # #     self.assertEqual(self.amity.reallocate_person.new_room_name, self.amity.reallocate_person.self.living_allocate)
 
 
-    # def test_print_room(self):
-    #     pass
 
-    # def test_print_unallocated(self):
-    #     pass
+    # # def test_reallocate_person(self):
+    # #     pass
 
-    def test_load_state(self):
-        self.assertGreater(len(self.amity.load_state.room_state), 1)
-        self.assertGreater(len(self.amity.load_state.living_state), 1)
+    # def test_print_allocations(self):
+    #     self.amity.print_allocations(self, *args)
+    #     self.assertEqual(type(self.amity.self.print_allocations.office_occupants) > list)
+    #     self.assertEqual(len(self.amity.self.print_allocations.living_occupants) > 1)
+
+
+    # # def test_print_room(self):
+    # #     pass
+
+    # # def test_print_unallocated(self):
+    # #     pass
+
+    # def test_load_state(self):
+    #     self.assertGreater(len(self.amity.load_state.room_state), 1)
+    #     self.assertGreater(len(self.amity.load_state.living_state), 1)
+    def tearDown(self):
+        self.amity = None
+        self.conn.close()
+
 
 if __name__ == '__main__':
     unittest.main()

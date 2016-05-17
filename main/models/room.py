@@ -1,4 +1,4 @@
-import ipdb
+
 class Room(object):
     """Room is the parent and Office and Living_space inherit from it"""
 
