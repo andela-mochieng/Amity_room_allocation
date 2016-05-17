@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/andela-mochieng/Amity_room_allocation.svg?branch=develop)](https://travis-ci.org/andela-mochieng/Amity_room_allocation)
 ##Amity Room Allocation
 
 >This is a a console application allocate offices and living spaces at Amity to Andela employees.
