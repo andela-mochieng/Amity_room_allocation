@@ -34,12 +34,10 @@ class Amity(object):
         }
 
         self.room_type = "O" or "L"
-        self.name = ""
-        name = self.name
-        self.personnel_type = ""
-        personnel_type = self.personnel_type
-        self.want_accommodation = ""
-        want_accommodation = self.want_accommodation
+
+        name = self.name = ""
+        personnel_type = self.personnel_type = ""
+        want_accommodation = self.want_accommodation = ""
 
         self.offices = []
         self.full_name = []
@@ -100,6 +98,7 @@ class Amity(object):
                 "INSERT INTO Rooms (Name, type) VALUES (?, ?)", [room_name, room_type])
             self.conn.commit()
         print('New rooms succesfully created')
+        return room
 
     def office_space_count(self, off_name):
         ''' keep track of offices allocated'''
@@ -133,6 +132,7 @@ class Amity(object):
 
         self.allocation_rule(name, person_type,
                              want_accommodation)
+        return name +" " + person_type + " " + want_accommodation
 
     def get_rooms(self, r_type):
         return self.connect.execute(
@@ -171,6 +171,7 @@ class Amity(object):
         else:
             print("Personnel hasn't requested to be housed")
 
+
     def insert_db(self, **kwargs):
         if kwargs['person_type'].upper() is "FELLOW" or "STAFF":
             self.connect.execute("INSERT INTO Persons (Name, Personnel_type, want_accommodation) VALUES (?, ?, ?)", [
@@ -188,6 +189,7 @@ class Amity(object):
         self.conn.commit()
         print(
             self.person_name + " successfully allocated to office: " + self.office_name)
+        return  self.person_name, self.office_name
 
     def allocate_housing(self, name, housing):
         '''only allocates fellow who want accommodation to living spaces'''
@@ -195,14 +197,12 @@ class Amity(object):
         self.housing = str(housing).strip('[').strip(']').strip("'").strip("'")
         allocate = self.connect.execute(
             "UPDATE Persons set living_accomodation = ? WHERE Persons.Name = ?", [self.housing, self.name])
-        self.conn.commit()
         print(self.name + " successfully allocated to house: " + self.housing)
+        print(self.housing, self.name)
+        return self.housing, self.name
 
     def reallocate_person(self, person_id, new_room_name):
-        '''method searches the db for the personnel details, and the details of the new
-        room to be allocated to and reallocates according to whether fellow or
-        staff and alerts if person was already an occupant of that room'''
-
+        '''method searches the db for the personnel details, and the details of the new room to be allocated to and reallocates according to whether fellow or staff and alerts if person was already an occupant of that room'''
         person_allocate = self.connect.execute(
             "SELECT * FROM Persons WHERE Persons.id = ?", [person_id]).fetchall()
         self._id = person_allocate[0][0]
@@ -220,6 +220,7 @@ class Amity(object):
             print(str(self._id) + "is already allocated to " + new_room_name)
         room_to_move = self.connect.execute(
             "SELECT * FROM Rooms WHERE Rooms.Name = ?", [new_room_name]).fetchall()
+        print(type(room_to_move))
         if len(room_to_move) == 0:
             print("Room" + new_room_name + " does not exist")
         else:
@@ -245,6 +246,7 @@ class Amity(object):
             else:
                 print(
                     self.person_name + " not reallocated to " + self.room_name)
+        return self.person_name, self.room_name
 
     def load_people(self, *args):
         load = Tk()
@@ -287,7 +289,9 @@ class Amity(object):
             puts(colored.green(
                 '\n Below is list  of office personnel allocated to rooms: \n'))
             for row in allocated:
-                print(' '.join(map(str, list(row))))
+                row = (' '.join(map(str, list(row))))
+                print(row)
+        return row
 
     def write_to_file(self, file_name, allocated):
         with open(file_name, 'a+') as f:
