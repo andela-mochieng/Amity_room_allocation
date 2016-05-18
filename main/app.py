@@ -15,7 +15,6 @@ from .util.File import FileParser
 import ipdb
 
 
-
 class Amity(object):
     """Description for amity"""
 
@@ -34,6 +33,7 @@ class Amity(object):
             'L': {' ': []}
         }
 
+        self.room_type = "O" or "L"
         self.name = ""
         name = self.name
         self.personnel_type = ""
@@ -70,6 +70,8 @@ class Amity(object):
 
         self.living_occupied = 0
         self.office_occupied = 0
+        file = self.file = " "
+        allocated = self.allocated = []
 
         self.conn = sqlite3.connect("amity.sqlite")
         self.conn.row_factory = sqlite3.Row
@@ -105,8 +107,6 @@ class Amity(object):
         office_space = self.connect.execute(
             "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [off_name]).fetchall()
         self.office_occupied = office_space[0][0]
-        print(self.office_occupied)
-
         return self.office_occupied
 
     def living_space_count(self, liv_name):
@@ -137,7 +137,6 @@ class Amity(object):
     def get_rooms(self, r_type):
         return self.connect.execute(
             "SELECT Name FROM Rooms where type = '" + r_type + "'").fetchall()
-
 
     def allocation_rule(self, name, person_type, want_accommodation):
         '''to randomly allocate everyone an office'''
@@ -221,10 +220,13 @@ class Amity(object):
             print(str(self._id) + "is already allocated to " + new_room_name)
         room_to_move = self.connect.execute(
             "SELECT * FROM Rooms WHERE Rooms.Name = ?", [new_room_name]).fetchall()
-        print(room_to_move)
-        self.room_id = room_to_move[0][0]
-        self.room_name = room_to_move[0][1]
-        self.room_type = room_to_move[0][2]
+        if len(room_to_move) == 0:
+            print("Room" + new_room_name + " does not exist")
+        else:
+            self.room_id = room_to_move[0][0]
+            self.room_name = room_to_move[0][1]
+            self.room_type = room_to_move[0][2]
+
         if self.room_type.upper() == 'O':
             self.connect.execute("UPDATE Persons set office_accommodation = ? WHERE Persons.id = ?", [
                                  self.room_name, self._id])
@@ -256,9 +258,9 @@ class Amity(object):
             input_data = parser.read_file()
             for lines in input_data:
                 print(lines)
-                ipdb.set_trace()
+
                 if len(lines) > 2:
-                    ipdb.set_trace()
+
                     name = lines[0].strip(',')
                     person_type = lines[1]
                     want_accommodation = lines[2]
@@ -273,38 +275,46 @@ class Amity(object):
     def get_allocations(self, condition):
         return self.connect.execute("SELECT Persons.Name, Persons.office_accommodation, Persons.living_accomodation from Persons where " + condition).fetchall()
 
-
     def print_allocations(self, *args):
         """function screens data from db to the cmdline and into a file """
-        allocations = self.get_allocations(
-            'office_accommodation = ? or living_accomodation = ?,  ')
-        file = args[0]['--o']
-        if file:
-            filename = file
-            with open(filename, 'a+') as f:
-                for row in allocations:
-                    record = map(str, list(row))
-                    f.write('\n' + ' '.join(record))
+        allocated = self.get_allocations(
+            'office_accommodation not null or living_accomodation not null ')
+
+        file_name = args[0]['--o']
+        if file_name:
+            self.write_to_file(file_name, allocated)
         else:
             puts(colored.green(
                 '\n Below is list  of office personnel allocated to rooms: \n'))
-            for row in allocations:
-                print(map(str, list(row)))
+            for row in allocated:
+                print(' '.join(map(str, list(row))))
+
+    def write_to_file(self, file_name, allocated):
+        with open(file_name, 'a+') as f:
+            for row in allocated:
+                record = map(str, list(row))
+                f.write('\n' + ' '.join(record))
 
     def print_unallocated(self, *args):
         unallocated = self.get_allocations(
-            'office_accommodation is null or living_accomodation is null')
-        print(unallocated)
+            'office_accommodation is null or Personnel_type = "fellow"  and want_accommodation = " y" and  living_accomodation is null')
+        file_name =args[0]['--o']
+        if file_name:
+            self.write_to_file(file_name, unallocated)
+        else:
+            puts(colored.green(
+                '\n Below is list  personnel unallocated to rooms: \n'))
+            for row in unallocated:
+                print(' '.join(map(str, list(row))))
+
 
     def print_room(self, room_name):
         """function prints out members of a room"""
-        people_allocated  = self.connect.execute(
+        people_allocated = self.connect.execute(
             "SELECT Name FROM Persons where office_accommodation = '" + room_name + "' or living_accomodation = '" + room_name + "'").fetchall()
         print("The following are allocated to " + room_name)
         print("-" * 30)
         print((' ').join(map(lambda p: str(p[0]), people_allocated)))
-
-
 
     def save_file_path(self, path):
         with open("filePath", "w+") as f:
