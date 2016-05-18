@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/andela-mochieng/Amity_room_allocation.svg?branch=develop)](https://travis-ci.org/andela-mochieng/Amity_room_allocation)
+[![Coverage Status](https://coveralls.io/repos/github/andela-mochieng/Amity_room_allocation/badge.svg?branch=master)](https://coveralls.io/github/andela-mochieng/Amity_room_allocation?branch=master)
+
 ##Amity Room Allocation
 
 >This is a a console application allocate offices and living spaces at Amity to Andela employees.
@@ -79,6 +81,9 @@ $ (Amity) load_state <amity.sqlite>
 ```shell
 $ (Amity) (-h | --help)
 ```
+
+**watch the functionality**
+[![asciicast](https://asciinema.org/a/ecf1yzu8gvhiwwtg5ry4fuoil.png)](https://asciinema.org/a/ecf1yzu8gvhiwwtg5ry4fuoil)
 
 
 
