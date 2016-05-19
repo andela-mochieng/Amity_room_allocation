@@ -5,7 +5,7 @@ class FileParser(object):
         self.file_path = file_path
 
     def read_file(self):
-        """read content of the file and return a list"""
+        """Read content of the file and return a list"""
         allocations_list = []
         lines = [line.rstrip('\n') for line in open(self.file_path, 'r')]
         for line in lines:

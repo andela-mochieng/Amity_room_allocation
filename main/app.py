@@ -28,10 +28,7 @@ class Amity(object):
         self.people_data = {'Staff': [],
                             'Fellow': []
                             }
-        self.allocate = {
-            'O': {' ': []},
-            'L': {' ': []}
-        }
+
 
         self.room_type = "O" or "L"
 
@@ -81,7 +78,7 @@ class Amity(object):
             "CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Personnel_type TEXT, want_accommodation TEXT, office_accommodation TEXT , living_accomodation TEXT)")
 
     def create_rooms(self, room):
-        """allows user to enter a list of room names specifying
+        """Allows user to enter a list of room names specifying
                 whether office or living spaces"""
         room_type = raw_input(
             "Enter room type: \n O: Office space \n L: Living space: \n")
@@ -101,7 +98,7 @@ class Amity(object):
         return room
 
     def office_space_count(self, off_name):
-        ''' keep track of offices allocated'''
+        '''Keep track of offices allocated should be less than 6'''
         off_name = str(off_name)
         office_space = self.connect.execute(
             "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [off_name]).fetchall()
@@ -109,7 +106,7 @@ class Amity(object):
         return self.office_occupied
 
     def living_space_count(self, liv_name):
-        '''keep track of living space allocated'''
+        '''Keep track of living space allocated should be less than 4'''
         # print(liv_name)
         living_space = self.connect.execute(
             "SELECT COUNT(*) AS living_occupants FROM Persons WHERE Persons.living_accomodation = ?", [liv_name]).fetchall()
@@ -119,6 +116,7 @@ class Amity(object):
         return self.living_occupied
 
     def add_person(self, first_name, last_name, person_type, want_housing):
+        '''Method receives personnel data and calls other method to save and allocate rooms to personnel '''
         name = first_name + " " + last_name
         person_type = person_type
         want_accommodation = want_housing
@@ -139,7 +137,7 @@ class Amity(object):
             "SELECT Name FROM Rooms where type = '" + r_type + "'").fetchall()
 
     def allocation_rule(self, name, person_type, want_accommodation):
-        '''to randomly allocate everyone an office'''
+        '''Randomly allocate everyone an office'''
         office_rooms = self.get_rooms('O')
         for office_room in office_rooms:
             room = Office(self.connect)
@@ -173,13 +171,14 @@ class Amity(object):
 
 
     def insert_db(self, **kwargs):
+        '''Method saves personel to the db '''
         if kwargs['person_type'].upper() is "FELLOW" or "STAFF":
             self.connect.execute("INSERT INTO Persons (Name, Personnel_type, want_accommodation) VALUES (?, ?, ?)", [
                                  kwargs['name'], kwargs['person_type'], kwargs['want_accommodation']])
             self.conn.commit()
 
     def allocate_office(self, person_name, office_name):
-        """function allocates both staff & fellow office"""
+        '''Method allocates both staff and fellow office spaces '''
         self.person_name = person_name
         self.office_name = str(office_name).strip(
             '[').strip(']').strip("'").strip("'")
@@ -192,7 +191,7 @@ class Amity(object):
         return  self.person_name, self.office_name
 
     def allocate_housing(self, name, housing):
-        '''only allocates fellow who want accommodation to living spaces'''
+        '''Only allocates fellow who want accommodation to living spaces'''
         self.name = name
         self.housing = str(housing).strip('[').strip(']').strip("'").strip("'")
         allocate = self.connect.execute(
@@ -201,7 +200,7 @@ class Amity(object):
         return self.housing, self.name
 
     def reallocate_person(self, person_id, new_room_name):
-        '''method searches the db for the personnel details, and the details of the new room to be allocated to and reallocates according to whether fellow or staff and alerts if person was already an occupant of that room'''
+        '''Method searches the db for the personnel details, and the details of the new room to be allocated to and reallocates according to whether fellow or staff and alerts if person was already an occupant of that room'''
         person_allocate = self.connect.execute(
             "SELECT * FROM Persons WHERE Persons.id = ?", [person_id]).fetchall()
         self._id = person_allocate[0][0]
@@ -248,6 +247,7 @@ class Amity(object):
         return self.person_name, self.room_name
 
     def load_people(self, *args):
+        '''Allows user to allocate people by loading data from a file '''
         load = Tk()
         load.withdraw()
         load.update()
@@ -274,10 +274,11 @@ class Amity(object):
                 self.allocation_rule(name, person_type, want_accommodation)
 
     def get_allocations(self, condition):
+        '''Retrieves people allocate to room from the db'''
         return self.connect.execute("SELECT Persons.Name, Persons.office_accommodation, Persons.living_accomodation from Persons where " + condition).fetchall()
 
     def print_allocations(self, *args):
-        """function screens data from db to the cmdline and into a file """
+        """function prints to the screen people allocated to rooms as well as to a file if specified"""
         allocated = self.get_allocations(
             'office_accommodation not null or living_accomodation not null ')
 
@@ -293,12 +294,14 @@ class Amity(object):
         return row
 
     def write_to_file(self, file_name, allocated):
+        '''Appends data to files'''
         with open(file_name, 'a+') as f:
             for row in allocated:
                 record = map(str, list(row))
                 f.write('\n' + ' '.join(record))
 
     def print_unallocated(self, *args):
+        """Prints to the screen people unallocated rooms as well as to a file if specified"""
         unallocated = self.get_allocations(
             'office_accommodation is null or Personnel_type = "fellow"  and want_accommodation = " y" and  living_accomodation is null')
 
@@ -315,7 +318,7 @@ class Amity(object):
 
 
     def print_room(self, room_name):
-        """function prints out members of a room"""
+        """Prints out members of a room"""
         people_allocated = self.connect.execute(
             "SELECT Name FROM Persons where office_accommodation = '" + room_name + "' or living_accomodation = '" + room_name + "'").fetchall()
         print("The following are allocated to " + room_name)
@@ -325,6 +328,7 @@ class Amity(object):
         return type(people_allocated)
 
     def save_file_path(self, path):
+        '''Saves the path of a file uploaded'''
         with open("filePath", "w+") as f:
             f.write(path)
             return path

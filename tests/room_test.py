@@ -17,7 +17,6 @@ class roomstest(unittest.TestCase):
                             'Fellow': []
                             }
 
-
     def test_add_person(self):
         self.assertEqual(self.amity.add_person('Margie', 'Rain', 'Fellow', 'Y'), 'Margie Rain Fellow Y')
 
@@ -27,11 +26,6 @@ class roomstest(unittest.TestCase):
 
     def test_living_space_count(self):
         self.assertEqual(self.amity.living_space_count('Ruby'), 0)
-
-
-    # def test_allocation_rule(self):
-    #     self.assertEqual(self.amity.allocation_rule('Margie Rain', 'Fellow', 'Y'))
-
 
 
     def test_allocate_housing(self):
