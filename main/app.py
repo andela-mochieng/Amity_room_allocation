@@ -198,7 +198,6 @@ class Amity(object):
         allocate = self.connect.execute(
             "UPDATE Persons set living_accomodation = ? WHERE Persons.Name = ?", [self.housing, self.name])
         print(self.name + " successfully allocated to house: " + self.housing)
-        print(self.housing, self.name)
         return self.housing, self.name
 
     def reallocate_person(self, person_id, new_room_name):
@@ -319,6 +318,7 @@ class Amity(object):
         print("The following are allocated to " + room_name)
         print("-" * 30)
         print((' ').join(map(lambda p: str(p[0]), people_allocated)))
+        return people_allocated
 
     def save_file_path(self, path):
         with open("filePath", "w+") as f:
@@ -328,7 +328,7 @@ class Amity(object):
         puts(colored.green(" Data stored in the Rooms's table"))
         room_state = self.connect.execute("SELECT * FROM Rooms").fetchall()
         print('\n'.join(map(str, room_state)))
-        puts(colored.blue(" Data stored in the Persons's table"))
+        puts(colored.blue(" Data stored in the Persons's table"'\n'))
         living_state = self.connect.execute("SELECT * FROM Persons").fetchall()
         print('\n'.join(map(str, living_state)))
 
