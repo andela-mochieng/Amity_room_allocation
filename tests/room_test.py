@@ -40,12 +40,12 @@ class roomstest(unittest.TestCase):
     def test_allocate_housing(self):
         self.assertEqual(self.amity.allocate_housing('Margie Rain', 'Ruby'), ('Ruby', 'Margie Rain'))
 
-    # def test_reallocate_person(self):
-    #     self.assertEqual(self.amity.reallocate_person('1', 'php'),('Margie Rain', 'php'))
 
+    def test_save_file_path(self):
+        self.assertEqual(self.amity.save_file_path('allocation.txt'), 'allocation.txt')
 
-
-
+    def test_print_room(self):
+        self.assertEqual(self.amity.print_room('php'), (type("")))
 
 
     def tearDown(self):

@@ -301,14 +301,17 @@ class Amity(object):
     def print_unallocated(self, *args):
         unallocated = self.get_allocations(
             'office_accommodation is null or Personnel_type = "fellow"  and want_accommodation = " y" and  living_accomodation is null')
-        file_name =args[0]['--o']
-        if file_name:
+
+        if args[0] != None:
+            file_name = args[0]['--o']
             self.write_to_file(file_name, unallocated)
         else:
             puts(colored.green(
                 '\n Below is list  personnel unallocated to rooms: \n'))
             for row in unallocated:
-                print(' '.join(map(str, list(row))))
+                row = (' '.join(map(str, list(row))))
+                print(type(row))
+                return (row)
 
 
     def print_room(self, room_name):
@@ -317,12 +320,14 @@ class Amity(object):
             "SELECT Name FROM Persons where office_accommodation = '" + room_name + "' or living_accomodation = '" + room_name + "'").fetchall()
         print("The following are allocated to " + room_name)
         print("-" * 30)
-        print((' ').join(map(lambda p: str(p[0]), people_allocated)))
-        return people_allocated
+        people_allocated = ((' ').join(map(lambda p: str(p[0]), people_allocated)))
+        print(people_allocated)
+        return type(people_allocated)
 
     def save_file_path(self, path):
         with open("filePath", "w+") as f:
             f.write(path)
+            return path
 
     def load_state(self, args):
         puts(colored.green(" Data stored in the Rooms's table"))
