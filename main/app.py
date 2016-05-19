@@ -12,7 +12,6 @@ from termcolor import cprint
 
 from .models.room import Office, LivingSpace
 from .util.File import FileParser
-import ipdb
 
 
 class Amity(object):
@@ -218,7 +217,6 @@ class Amity(object):
             print(str(self._id) + "is already allocated to " + new_room_name)
         room_to_move = self.connect.execute(
             "SELECT * FROM Rooms WHERE Rooms.Name = ?", [new_room_name]).fetchall()
-        print(type(room_to_move))
         if len(room_to_move) == 0:
             print("Room" + new_room_name + " does not exist")
         else:
@@ -291,7 +289,7 @@ class Amity(object):
             for row in allocated:
                 row = (' '.join(map(str, list(row))))
                 print(row)
-        return row
+                return row
 
     def write_to_file(self, file_name, allocated):
         '''Appends data to files'''
@@ -305,15 +303,15 @@ class Amity(object):
         unallocated = self.get_allocations(
             'office_accommodation is null or Personnel_type = "fellow"  and want_accommodation = " y" and  living_accomodation is null')
 
-        if args[0] != None:
-            file_name = args[0]['--o']
+        file_name = args[0]['--o']
+        if file_name:
             self.write_to_file(file_name, unallocated)
         else:
             puts(colored.green(
                 '\n Below is list  personnel unallocated to rooms: \n'))
             for row in unallocated:
                 row = (' '.join(map(str, list(row))))
-                print(type(row))
+                print(row)
                 return (row)
 
 
@@ -322,7 +320,7 @@ class Amity(object):
         people_allocated = self.connect.execute(
             "SELECT Name FROM Persons where office_accommodation = '" + room_name + "' or living_accomodation = '" + room_name + "'").fetchall()
         print("The following are allocated to " + room_name)
-        print("-" * 30)
+        puts(colored.green("-" * 60))
         people_allocated = ((' ').join(map(lambda p: str(p[0]), people_allocated)))
         print(people_allocated)
         return type(people_allocated)
@@ -336,10 +334,15 @@ class Amity(object):
     def load_state(self, args):
         puts(colored.green(" Data stored in the Rooms's table"))
         room_state = self.connect.execute("SELECT * FROM Rooms").fetchall()
-        print('\n'.join(map(str, room_state)))
+        for room in room_state:
+            room = list(room)
+            print(' '.join([str(i) for i in room]))
+
         puts(colored.blue(" Data stored in the Persons's table"'\n'))
         living_state = self.connect.execute("SELECT * FROM Persons").fetchall()
-        print('\n'.join(map(str, living_state)))
+        for living in living_state:
+            living = list(living)
+            print(' '. join([str(i) for i in living]))
 
 
 def welcome_msg():

@@ -14,7 +14,6 @@ Options:
     -l, --launch  Launch the application.
     -h,--help  display a list of command to the user
 """
-import ipdb
 import sys
 import cmd
 from main.app import Amity, welcome_msg
