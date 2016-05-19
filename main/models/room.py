@@ -3,8 +3,9 @@ class Room(object):
     """Room is the parent and Office and Living_space inherit from it"""
 
     def __init__(self, connection):
+        '''Connection is used to connect to the cursor object so thatthe is_room_filled method works'''
         self.connect = connection
-        #self.name = name
+
 
     def is_room_filled(self, room_name):
         count = self.connect.execute(
