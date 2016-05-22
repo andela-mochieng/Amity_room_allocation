@@ -6,10 +6,10 @@ class Room(object):
         '''Connection is used to connect to the cursor object so thatthe is_room_filled method works'''
         self.connect = connection
 
-
     def is_room_filled(self, room_name):
         count = self.connect.execute(
             "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [str(room_name)]).fetchall()
+
         return count[0][0] > self.capacity
 
 
