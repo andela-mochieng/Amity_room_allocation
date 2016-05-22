@@ -12,6 +12,7 @@ from termcolor import cprint
 
 from .models.room import Office, LivingSpace
 from .util.File import FileParser
+import ipdb
 
 
 class Amity(object):
@@ -29,7 +30,7 @@ class Amity(object):
                             }
 
 
-        self.room_type = "O" or "L"
+        room_type = self.room_type = "O" or "L"
 
         name = self.name = ""
         personnel_type = self.personnel_type = ""
@@ -101,23 +102,6 @@ class Amity(object):
         print('New rooms succesfully created')
         return room
 
-    def office_space_count(self, off_name):
-        '''Keep track of offices allocated should be less than 6'''
-        off_name = str(off_name)
-        office_space = self.connect.execute(
-            "SELECT COUNT(*) AS office_occupants FROM Persons  WHERE Persons.office_accommodation = ?", [off_name]).fetchall()
-        self.office_occupied = office_space[0][0]
-        return self.office_occupied
-
-    def living_space_count(self, liv_name):
-        '''Keep track of living space allocated should be less than 4'''
-        # print(liv_name)
-        living_space = self.connect.execute(
-            "SELECT COUNT(*) AS living_occupants FROM Persons WHERE Persons.living_accomodation = ?", [liv_name]).fetchall()
-        for liv_space in living_space:
-            self.living_occupied = liv_space[0]
-            print(self.living_occupied)
-        return self.living_occupied
 
     def add_person(self, first_name, last_name, person_type, want_housing):
         '''Method receives personnel data and calls other method to save and allocate rooms to personnel '''
@@ -142,26 +126,27 @@ class Amity(object):
 
     def allocation_rule(self, name, person_type, want_accommodation):
         '''Randomly allocate everyone an office'''
-        office_rooms = self.get_rooms('O')
-        for office_room in office_rooms:
-            room = Office(self.connect)
-            office_name = office_room[0]
+        if person_type.upper() == "STAFF" or person_type.upper() == "FELLOW":
+            office_rooms = self.get_rooms('O')
+            for office_room in office_rooms:
+                room = Office(self.connect)
+                office_name = office_room[0]
 
-            if not room.is_room_filled(office_name):
-                self.available_office.append(office_name)
+                if room.is_room_filled(office_name) == False:
+                    self.available_office.append(office_name)
 
-        self.office = random.choice(self.available_office)
-        if self.office:
-            self.allocate_office(name, self.office)
-        else:
-            print('No office available')
+            self.office = random.choice(self.available_office)
+            if self.office:
+                self.allocate_office(name, self.office)
+            else:
+                print('No office available')
 
         if person_type.upper() == 'FELLOW' and want_accommodation == 'Y':
             living_rooms = self.get_rooms('L')
             for living_room in living_rooms:
                 room = LivingSpace(self.connect)
                 living_name = living_room[0]
-                if not room.is_room_filled(living_name):
+                if room.is_room_filled(living_name) == False:
                     self.available_housing.append(living_name)
 
             self.housing = random.choice(self.available_housing)
@@ -284,17 +269,17 @@ class Amity(object):
         """function prints to the screen people allocated to rooms as well as to a file if specified"""
         allocated = self.get_allocations(
             'office_accommodation not null or living_accomodation not null ')
-
         file_name = args[0]['--o']
         if file_name:
             self.write_to_file(file_name, allocated)
         else:
             puts(colored.green(
-                '\n Below is list  of office personnel allocated to rooms: \n'))
+                '\n Below is list of office personnel allocated to rooms: \n'))
+            ipdb.set_trace()
             for row in allocated:
                 row = (' '.join(map(str, list(row))))
-                print(row)
-                return row
+            print(row)
+            return row
 
     def write_to_file(self, file_name, allocated):
         '''Appends data to files'''
