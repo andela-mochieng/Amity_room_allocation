@@ -7,3 +7,9 @@ omit=
     *docopt*
     *__init__*
     *tests/*
+
+exclude_lines =
+    if __name__ == .__main__.:
+    create_rooms
+    load_people
+

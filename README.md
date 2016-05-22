@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/andela-mochieng/Amity_room_allocation.svg?branch=develop)](https://travis-ci.org/andela-mochieng/Amity_room_allocation)
-[![Coverage Status](https://coveralls.io/repos/github/andela-mochieng/Amity_room_allocation/badge.svg?branch=master)](https://coveralls.io/github/andela-mochieng/Amity_room_allocation?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/andela-mochieng/Amity_room_allocation/badge.svg?branch=develop)](https://coveralls.io/github/andela-mochieng/Amity_room_allocation?branch=develop)
 
 ##Amity Room Allocation
 

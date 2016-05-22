@@ -1,4 +1,3 @@
-import ipdb
 class FileParser(object):
 
     def __init__(self, file_path):
@@ -19,5 +18,4 @@ class FileParser(object):
 
             allocations_list.append(
                 [name, personnel_type, want_accommodation])
-
-        return allocations_list
+        return len(allocations_list)

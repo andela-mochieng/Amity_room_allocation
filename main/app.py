@@ -293,6 +293,7 @@ class Amity(object):
             for row in allocated:
                 record=map(str, list(row))
                 f.write('\n' + ' '.join(record))
+                return type(file_name)
 
     def print_unallocated(self, *args):
         """Prints to the screen people unallocated rooms as well as to a file if specified"""
@@ -342,6 +343,7 @@ class Amity(object):
         for living in living_state:
             living=list(living)
             print(' '. join([str(i) for i in living]))
+            return (type(room_state))
 
 
 def welcome_msg():

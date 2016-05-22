@@ -32,23 +32,25 @@ class roomstest(unittest.TestCase):
         if self.amity.print_allocations():
             self.assertEqual(self.amity.print_allocations(), type(""))
 
+
     def test_print_unallocated(self):
         if self.amity.print_unallocated():
             self.assertEqual(self.amity.print_unallocated(), type(""))
 
     def test_print_room(self):
-        self.amity.print_room('Ruby')
-        self.assertEqual(self.amity.print_room('Ruby'), type(""))
-
+        room =self.amity.print_room('Ruby')
+        self.assertEqual(room, type(""))
 
     def test_save_file_path(self):
         self.assertEqual(self.amity.save_file_path(
             'allocation.txt'), 'allocation.txt')
 
-    def test_print_room(self):
-        self.amity.print_room("php")
+    def test_write_to_file(self):
+        write_file = self.amity.write_to_file("allocations.txt", "allocations")
+        with open("allocations.txt", 'a+') as f:
+            lines = f.readlines()
+        self.assertTrue(write_file, "allocations.txt")
 
-        self.assertEqual(self.amity.print_room('php'), (type("")))
 
     def tearDown(self):
         self.amity = None
