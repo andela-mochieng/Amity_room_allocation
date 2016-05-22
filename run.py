@@ -95,9 +95,9 @@ class Amity_function_call(cmd.Cmd):
 
 
     @parser_cmd
-    def do_print_unallocated(self, *arg):
+    def do_print_unallocated(self, **kwargs):
         """Usage: print_unallocated [--o=filename]"""
-        amity.print_unallocated(*arg)
+        amity.print_unallocated(**kwargs)
 
     @parser_cmd
     def do_print_room(self, arg):

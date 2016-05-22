@@ -273,17 +273,19 @@ class Amity(object):
         """function prints to the screen people allocated to rooms as well as to a file if specified"""
         allocated=self.get_allocations(
             'office_accommodation not null or living_accomodation not null ')
-        file_name=args[0]['--o']
+        try:
+            file_name=args[0]['--o']
+        except IndexError:
+            file_name = None
         if file_name:
             self.write_to_file(file_name, allocated)
         else:
             puts(colored.green(
                 '\n Below is list of office personnel allocated to rooms: \n'))
-            ipdb.set_trace()
             for row in allocated:
                 row=(' '.join(map(str, list(row))))
             print(row)
-            return row
+            return type(row)
 
     def write_to_file(self, file_name, allocated):
         '''Appends data to files'''
@@ -296,8 +298,10 @@ class Amity(object):
         """Prints to the screen people unallocated rooms as well as to a file if specified"""
         unallocated=self.get_allocations(
             'office_accommodation is null or Personnel_type = "fellow"  and want_accommodation = " y" and  living_accomodation is null')
-
-        file_name=args[0]['--o']
+        try:
+            file_name=args[0]['--o']
+        except IndexError:
+            file_name = None
         if file_name:
             self.write_to_file(file_name, unallocated)
         else:
@@ -306,7 +310,7 @@ class Amity(object):
             for row in unallocated:
                 row=(' '.join(map(str, list(row))))
                 print(row)
-                return (row)
+                return (type(row))
 
 
     def print_room(self, room_name):
