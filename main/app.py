@@ -70,11 +70,16 @@ class Amity(object):
         self.conn = sqlite3.connect("amity.sqlite")
         self.conn.row_factory = sqlite3.Row
         self.connect = self.conn.cursor()
-        self.connect.execute(
-            "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, type TEXT)")
+        try:
+            self.connect.execute(
+                "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, type TEXT)")
 
-        self.connect.execute(
-            "CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Personnel_type TEXT, want_accommodation TEXT, office_accommodation TEXT , living_accomodation TEXT)")
+            self.connect.execute(
+                "CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Personnel_type TEXT, want_accommodation TEXT, office_accommodation TEXT , living_accomodation TEXT)")
+        except sqlite3.IntegrityError:
+            return False
+
+
 
     def create_rooms(self, room):
         """Allows user to enter a list of room names specifying
