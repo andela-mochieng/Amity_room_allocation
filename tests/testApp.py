@@ -1,7 +1,6 @@
 import unittest
 from ..main.app import Amity
 import sqlite3
-
 import os
 
 
@@ -50,7 +49,6 @@ class roomstest(unittest.TestCase):
         with open("allocations.txt", 'a+') as f:
             lines = f.readlines()
         self.assertTrue(write_file, "allocations.txt")
-
 
     def tearDown(self):
         self.amity = None
