@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/andela-mochieng/Amity_room_allocation.svg?branch=develop)](https://travis-ci.org/andela-mochieng/Amity_room_allocation)
 [![Coverage Status](https://coveralls.io/repos/github/andela-mochieng/Amity_room_allocation/badge.svg?branch=develop)](https://coveralls.io/github/andela-mochieng/Amity_room_allocation?branch=develop)
 
+
 ##Amity Room Allocation
 
 >This is a a console application allocate offices and living spaces at Amity to Andela employees.
@@ -21,7 +22,7 @@ $ git checkout develop
 $ cd Amity_room_allocation
 ```
 
-**__Install packages required__**
+**__Set up a virtualenv then Install packages required__**
 ```shell
 $ pip install  -r requirements.txt
 ```
