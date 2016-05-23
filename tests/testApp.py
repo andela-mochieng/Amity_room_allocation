@@ -51,6 +51,11 @@ class roomstest(unittest.TestCase):
             lines = f.readlines()
         self.assertTrue(write_file, "allocations.txt")
 
+    def test_load_state(self):
+        state = self.amity.load_state('amity.sqlite')
+        self.assertEqual(state, type([]))
+
+
     def test_welcome_msg(self):
         self.assertEqual(self.welcome,"Amity Room Allocation!")
 

@@ -1,7 +1,6 @@
 *.pyc
 .travis.yml
 *.sqlite
-.coverage
 *.db
 .idea
 .DS_Store
