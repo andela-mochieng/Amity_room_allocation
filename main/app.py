@@ -236,7 +236,7 @@ class Amity(object):
             else:
                 print(
                     self.person_name + " not reallocated to " + self.room_name)
-        return self.person_name, self.room_name
+        return type(self.room_name)
 
     def load_people(self, *args):
         '''Allows user to allocate people by loading data from a file '''

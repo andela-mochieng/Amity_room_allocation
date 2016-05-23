@@ -32,13 +32,18 @@ class roomstest(unittest.TestCase):
         if self.amity.print_allocations():
             self.assertEqual(self.amity.print_allocations(), type(""))
 
+    def test_reallocate_person(self):
+        reallocate = self.amity.reallocate_person(1, "Camelot")
+        self.assertEqual(reallocate, type("Margie rain, Ruby"))
+
+
 
     def test_print_unallocated(self):
         if self.amity.print_unallocated():
             self.assertEqual(self.amity.print_unallocated(), type(""))
 
     def test_print_room(self):
-        room =self.amity.print_room('Ruby')
+        room = self.amity.print_room('Ruby')
         self.assertEqual(room, type(""))
 
     def test_save_file_path(self):
