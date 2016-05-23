@@ -1,5 +1,5 @@
 import unittest
-from ..main.app import Amity
+from ..main.app import Amity, welcome_msg
 import sqlite3
 import os
 
@@ -7,6 +7,7 @@ import os
 class roomstest(unittest.TestCase):
     def setUp(self):
         self.amity = Amity()
+        self.welcome = welcome_msg()
         self.rooms = {
             'O': [],
             'L': []
@@ -49,6 +50,9 @@ class roomstest(unittest.TestCase):
         with open("allocations.txt", 'a+') as f:
             lines = f.readlines()
         self.assertTrue(write_file, "allocations.txt")
+
+    def test_welcome_msg(self):
+        self.assertEqual(self.welcome,"Amity Room Allocation!")
 
     def tearDown(self):
         self.amity = None
