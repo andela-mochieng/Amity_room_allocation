@@ -19,7 +19,7 @@ class roomstest(unittest.TestCase):
         self.assertEqual(self.amity.rooms['L'][2], 'Emerald')
 
     def test_add_person(self):
-
+        '''Test whether personnels are added to the db'''
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
         self.assertNotEqual(len(self.amity.people_data['Fellow']), 0)
         self.assertEqual(
@@ -32,6 +32,7 @@ class roomstest(unittest.TestCase):
 
 
     def test_get_rooms(self):
+        '''Test whether rooms are created in the db'''
         self.test_create_rooms()
         offices = self.amity.get_rooms('O')
         self.assertEqual(len(offices), 4)

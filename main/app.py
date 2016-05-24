@@ -67,6 +67,7 @@ class Amity(object):
         allocated = self.allocated = []
         self.office_rooms = []
         self.living_rooms = []
+        self.allocated = []
 
         self.conn = sqlite3.connect(db_name)
         self.conn.row_factory = sqlite3.Row
@@ -278,10 +279,10 @@ class Amity(object):
 
     def print_allocations(self, *args):
         """function prints to the screen people allocated to rooms as well as to a file if specified"""
-        allocated=self.get_allocations(
-            'office_accommodation not null or living_accomodation not null ')
+        self.allocated.extend(self.get_allocations(
+            'office_accommodation not null or living_accomodation not null '))
         try:
-            file_name=args[0]['--o']
+            file_name = args[0]['--o']
         except IndexError:
             file_name = None
         if file_name:
@@ -289,9 +290,11 @@ class Amity(object):
         else:
             puts(colored.green(
                 '\n Below is list of office personnel allocated to rooms: \n'))
-            for row in allocated:
+            for row in self.allocated:
                 row = (' '.join(map(str, list(row))))
                 print(row)
+                return row
+
 
 
     def write_to_file(self, file_name, allocated):
@@ -300,7 +303,6 @@ class Amity(object):
             for row in allocated:
                 record=map(str, list(row))
                 f.write('\n' + ' '.join(record))
-                return file_name
 
     def print_unallocated(self, *args):
         """Prints to the screen people unallocated rooms as well as to a file if specified"""
@@ -336,7 +338,7 @@ class Amity(object):
         '''Saves the path of a file uploaded'''
         with open("filePath", "w+") as f:
             f.write(path)
-            return path
+
 
     def load_state(self, args):
         puts(colored.green(" Data stored in the Rooms's table"))
@@ -350,7 +352,7 @@ class Amity(object):
         for living in living_state:
             living=list(living)
             print(' '. join([str(i) for i in living]))
-            return args
+            return room
 
 
     def drop_db(self):
