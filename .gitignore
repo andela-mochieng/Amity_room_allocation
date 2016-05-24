@@ -1,0 +1,7 @@
+*.pyc
+.travis.yml
+*.sqlite
+*.db
+.idea
+.DS_Store
+*.txt
