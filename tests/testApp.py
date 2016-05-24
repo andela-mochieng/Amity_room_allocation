@@ -2,70 +2,76 @@ import unittest
 from ..main.app import Amity, welcome_msg
 import sqlite3
 import os
-
+import ipdb
 
 class roomstest(unittest.TestCase):
     def setUp(self):
-        self.amity = Amity()
-        self.welcome = welcome_msg()
-        self.rooms = {
-            'O': [],
-            'L': []
-        }
+        self.amity = Amity("test.sqlite")
 
-        self.people_data = {'Staff': [],
-                            'Fellow': []
-                            }
-        name = self.name = ""
-        personnel_type = self.personnel_type = ""
-        want_accommodation = self.want_accommodation = ""
+    def test_create_rooms(self):
+        self.amity.create_rooms(
+            ["lilac", "Camelot", "Vallhalla", "Oculus"], "O")
+        self.amity.create_rooms(["Php", "Ruby", "Emerald", "Cedar"], "L")
+
+        self.assertEqual(len(self.amity.rooms['O']), 4)
+        self.assertEqual(len(self.amity.rooms['L']), 4)
+        self.assertEqual(self.amity.rooms['O'][0], 'lilac')
+        self.assertEqual(self.amity.rooms['L'][2], 'Emerald')
 
     def test_add_person(self):
-        self.amity.add_person("Margie", "Rain", "Fellow", "Y")
-        name = "Margie Rain"
-        person_type = "Fellow"
-        want_accommodation = "Y"
-        self.assertEqual(self.amity.add_person(
-            'Margie', 'Rain', 'Fellow', 'Y'), 'Margie Rain Fellow Y')
 
-    def test_print_allocations(self):
-        if self.amity.print_allocations():
-            self.assertEqual(self.amity.print_allocations(), type(""))
+        self.amity.add_person("Margie", "Rain", "Fellow", "Y")
+        self.assertNotEqual(len(self.amity.people_data['Fellow']), 0)
+        self.assertEqual(
+            self.amity.people_data['Fellow'][0].get('Margie Rain'), 'Y')
+        self.amity.add_person("Chidi", "Nnadi", "Staff", 'N')
+        self.assertNotEqual(len(self.amity.people_data['Staff']), 0)
+
+        self.assertEqual(
+            self.amity.people_data['Staff'][0], 'Chidi Nnadi')
+
+
+    def test_get_rooms(self):
+        self.test_create_rooms()
+        offices = self.amity.get_rooms('O')
+        self.assertEqual(len(offices), 4)
+        self.assertEqual(str(offices[0]['name']), 'lilac')
+        living = self.amity.get_rooms('L')
+        self.assertEqual(len(living), 4)
+        self.assertEqual(str(living[2]['name']), 'Emerald')
+
+    def test_allocation_rule(self):
+        self.test_create_rooms()
+        self.test_add_person()
+        self.amity.allocation_rule("Margie Rain", "Fellow", "Y")
+        office_allocations = self.amity.get_allocations("office_accommodation not null and name = 'Margie Rain'" )
+        self.assertNotEqual(office_allocations, None)
+
+        housing_allocations = self.amity.get_allocations("living_accomodation not null and name = 'Margie Rain'" )
+        self.assertNotEqual(housing_allocations, None)
+
+
 
     def test_reallocate_person(self):
-        reallocate = self.amity.reallocate_person(1, "Camelot")
-        self.assertEqual(reallocate, type("Margie rain, Ruby"))
+        self.test_allocation_rule()
+        self.amity.reallocate_person(1, "Camelot")
+        reallocate = self.amity.get_allocations("Persons.id = 1")
+        self.assertEqual(str(reallocate[0]['office_accommodation']), "Camelot")
+        self.amity.reallocate_person(1, "Cedar")
+        reallocate = self.amity.get_allocations("Persons.id = 1")
+        self.assertEqual(str(reallocate[0]['living_accomodation']), "Cedar")
 
 
 
-    def test_print_unallocated(self):
-        if self.amity.print_unallocated():
-            self.assertEqual(self.amity.print_unallocated(), type(""))
-
-    def test_print_room(self):
-        room = self.amity.print_room('Ruby')
-        self.assertEqual(room, type(""))
-
-    def test_save_file_path(self):
-        self.assertEqual(self.amity.save_file_path(
-            'allocation.txt'), 'allocation.txt')
-
-    def test_write_to_file(self):
-        write_file = self.amity.write_to_file("allocations.txt", "allocations")
-        with open("allocations.txt", 'a+') as f:
-            lines = f.readlines()
-        self.assertTrue(write_file, "allocations.txt")
-
-    def test_load_state(self):
-        state = self.amity.load_state('amity.sqlite')
-        self.assertEqual(state, type([]))
 
 
-    def test_welcome_msg(self):
-        self.assertEqual(self.welcome,"Amity Room Allocation!")
+
 
     def tearDown(self):
+        self.amity.drop_db()
         self.amity = None
+
+
 
 
 if __name__ == '__main__':

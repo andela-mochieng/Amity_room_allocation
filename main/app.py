@@ -18,16 +18,17 @@ import ipdb
 class Amity(object):
     """Description for amity"""
 
-    def __init__(self):
+    def __init__(self, db_name="amity.sqlite"):
         # variable used in create_rooms
         self.rooms = {
             'O': [],
             'L': []
         }
         # variable used in add_person
-        self.people_data = {'Staff': [],
-                            'Fellow': []
-                            }
+        self.people_data = {
+        'Staff': [],
+        'Fellow':[]
+        }
 
         room_type = self.room_type = "O" or "L"
 
@@ -44,9 +45,6 @@ class Amity(object):
         self.room_name = ""
         self.people_in_room = []
 
-        self.person_name = []
-        self.person_type = ""
-
         self.offices = []
         self.housing = []
 
@@ -61,6 +59,7 @@ class Amity(object):
         self.unallocated_houses = []
         self.office = []
         self.housing = []
+        self.input_data =[]
 
         self.living_occupied = 0
         self.office_occupied = 0
@@ -69,9 +68,12 @@ class Amity(object):
         self.office_rooms = []
         self.living_rooms = []
 
-        self.conn = sqlite3.connect("amity.sqlite")
+        self.conn = sqlite3.connect(db_name)
         self.conn.row_factory = sqlite3.Row
         self.connect = self.conn.cursor()
+        self.create_tables()
+
+    def create_tables(self):
         try:
             self.connect.execute(
                 "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, type TEXT)")
@@ -80,16 +82,15 @@ class Amity(object):
                 "CREATE TABLE IF NOT EXISTS Persons(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Personnel_type TEXT, want_accommodation TEXT, office_accommodation TEXT , living_accomodation TEXT)")
         except sqlite3.IntegrityError:
             return False
-
-    def create_rooms(self, room):
+    def create_rooms(self, room, room_type=None):
         """Allows user to enter a list of room names specifying
                 whether office or living spaces"""
-        room_type = raw_input(
-            "Enter room type: \n O: Office space \n L: Living space: \n")
-
-        while room_type != "O" and room_type != "L":
+        if room_type == None:
             room_type = raw_input(
-                "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
+            "Enter room type: \n O: Office space \n L: Living space: \n")
+            while room_type != "O" and room_type != "L":
+                room_type = raw_input(
+                    "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n")
         for room_name in room:
             if room_type.upper() == 'O':
                 self.rooms[room_type.upper()].append(room_name)
@@ -99,7 +100,6 @@ class Amity(object):
                 "INSERT INTO Rooms (Name, type) VALUES (?, ?)", [room_name, room_type])
             self.conn.commit()
         print('New rooms succesfully created')
-        return room
 
     def add_person(self, first_name, last_name, person_type, want_housing):
         '''Method receives personnel data and calls other method to save and allocate rooms to personnel '''
@@ -116,14 +116,14 @@ class Amity(object):
 
         self.allocation_rule(name, person_type,
                              want_accommodation)
-        return name + " " + person_type + " " + want_accommodation
+
 
     def get_rooms(self, r_type):
         return self.connect.execute(
             "SELECT Name FROM Rooms where type = '" + r_type + "'").fetchall()
 
     def allocation_rule(self, name, person_type, want_accommodation):
-        '''Randomly allocate everyone an office'''
+        '''Randomly aocate everyone an office'''
         if person_type.upper() == "STAFF" or person_type.upper() == "FELLOW":
             office_rooms = self.office_rooms
             if len(office_rooms) < 1:
@@ -136,7 +136,7 @@ class Amity(object):
                     if room.is_room_filled(office_name) == False:
                         self.available_office.append(office_name)
 
-                self.office=random.choice(self.available_office)
+                self.office = random.choice(self.available_office)
                 if self.office:
                     self.allocate_office(name, self.office)
                 else:
@@ -181,7 +181,7 @@ class Amity(object):
         self.conn.commit()
         print(
             self.person_name + " successfully allocated to office: " + self.office_name)
-        return self.person_name, self.office_name
+
 
     def allocate_housing(self, name, housing):
         '''Only allocates fellow who want accommodation to living spaces'''
@@ -238,32 +238,39 @@ class Amity(object):
                     self.person_name + " not reallocated to " + self.room_name)
         return type(self.room_name)
 
-    def load_people(self, *args):
+    def load_people(self, load_file):
         '''Allows user to allocate people by loading data from a file '''
-        load=Tk()
-        load.withdraw()
-        load.update()
-        file=tkFileDialog.askopenfile(
-            parent=load, mode='rb', title="Load file")
-        if file:
-            self.save_file_path(file.name)
-            parser=FileParser(file.name)
-            input_data=parser.read_file()
-            for lines in input_data:
-                print(lines)
 
-                if len(lines) > 2:
+        if len(load_file) < 1 :
+            load = Tk()
+            load.withdraw()
+            load.update()
+            load_file = tkFileDialog.askopenfile(
+                parent=load, mode='rb', title="Load file")
+            filename = load_file.name
+        else:
+            filename = load_file
 
-                    name=lines[0].strip(',')
-                    person_type=lines[1]
-                    want_accommodation=lines[2]
-                else:
-                    name=lines[0]
-                    person_type=lines[1]
-                    want_accommodation="N"
-                self.insert_db(name=name, person_type=person_type,
-                               want_accommodation=want_accommodation)
-                self.allocation_rule(name, person_type, want_accommodation)
+        self.save_file_path(filename)
+        parser = FileParser(filename)
+        self.input_data = parser.read_file()
+
+
+        for lines in self.input_data:
+            print(lines)
+
+            if len(lines) > 2:
+
+                name=lines[0].strip(',')
+                person_type=lines[1]
+                want_accommodation=lines[2]
+            else:
+                name=lines[0]
+                person_type=lines[1]
+                want_accommodation="N"
+            self.insert_db(name=name, person_type=person_type,
+                           want_accommodation=want_accommodation)
+            self.allocation_rule(name, person_type, want_accommodation)
 
     def get_allocations(self, condition):
         '''Retrieves people allocate to room from the db'''
@@ -293,7 +300,7 @@ class Amity(object):
             for row in allocated:
                 record=map(str, list(row))
                 f.write('\n' + ' '.join(record))
-                return type(file_name)
+                return file_name
 
     def print_unallocated(self, *args):
         """Prints to the screen people unallocated rooms as well as to a file if specified"""
@@ -343,7 +350,12 @@ class Amity(object):
         for living in living_state:
             living=list(living)
             print(' '. join([str(i) for i in living]))
-            return (type(room_state))
+            return args
+
+
+    def drop_db(self):
+        self.connect.execute("DROP TABLE Rooms")
+        self.connect.execute("DROP TABLE Persons")
 
 
 def welcome_msg():
