@@ -11,4 +11,6 @@ omit=
 exclude_lines =
     if __name__ == .__main__.:
         load_state
+        print_allocations
+        print_unallocated
 

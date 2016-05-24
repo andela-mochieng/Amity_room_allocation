@@ -52,7 +52,6 @@ class roomstest(unittest.TestCase):
         self.assertNotEqual(housing_allocations, None)
 
 
-
     def test_reallocate_person(self):
         '''Testing reallocation of persons'''
         self.test_allocation_rule()
@@ -69,8 +68,6 @@ class roomstest(unittest.TestCase):
     def tearDown(self):
         self.amity.drop_db()
         self.amity = None
-
-
 
 
 if __name__ == '__main__':
