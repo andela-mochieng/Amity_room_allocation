@@ -53,6 +53,7 @@ class roomstest(unittest.TestCase):
 
 
     def test_reallocate_person(self):
+        '''Testing reallocation of persons'''
         self.test_allocation_rule()
         self.amity.reallocate_person(1, "Camelot")
         reallocate = self.amity.get_allocations("Persons.id = 1")
@@ -60,9 +61,6 @@ class roomstest(unittest.TestCase):
         self.amity.reallocate_person(1, "Cedar")
         reallocate = self.amity.get_allocations("Persons.id = 1")
         self.assertEqual(str(reallocate[0]['living_accomodation']), "Cedar")
-
-
-
 
 
 

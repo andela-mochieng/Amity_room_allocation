@@ -290,9 +290,9 @@ class Amity(object):
             puts(colored.green(
                 '\n Below is list of office personnel allocated to rooms: \n'))
             for row in allocated:
-                row=(' '.join(map(str, list(row))))
-            print(row)
-            return type(row)
+                row = (' '.join(map(str, list(row))))
+                print(row)
+
 
     def write_to_file(self, file_name, allocated):
         '''Appends data to files'''
