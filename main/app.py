@@ -81,32 +81,34 @@ class Amity(object):
 
 
     def allocate_room(self, person, room_type):
+        ''' we get the name of the first available room, check if the room exist,
+        Get the number of occupants,Alllocate the room till its full, if room filled remove it
+        else alllocate room, store unallocated'''
         allocated = False
-        # we get the name of the first available room
-        room = self.rooms[room_type][0]
-        # check if the room exist
-        if self.room_dict.get(room) is None:
-            self.room_dict[room] = []
-        #  Get the number of occupants
-        check_capacity = len(self.room_dict[room])
-        # Alllocate the room till its full
-        while not allocated:
-            # if room filled remove it
-            if self.space.is_filled(check_capacity):
-                self.full_populated_room.append(self.rooms[room_type].remove(room,None))
-                room = self.rooms[room_type][0]
+        if self.rooms[room_type] != []:
+            room = self.rooms[room_type][0]
+            if self.room_dict.get(room) is None:
                 self.room_dict[room] = []
-            print("fullly")
-            print(self.full_populated_room)
-            # else alllocate room
-            self.room_dict[room].append(person)
-            allocated = True
-        print(self.room_dict)
-        # store unallocated
+                check_capacity = len(self.room_dict[room])
+                while not allocated:
+                    if not self.space.is_filled(check_capacity):
+                        self.room_dict[room].append(person)
+                        allocated = True
+                    print(self.room_dict)
+                    self.full_populated_room.append(self.rooms[room_type].remove(room))
+                    print("fullly")
+                    print(self.full_populated_room)
+
+                    if self.rooms[room_type] != []:
+                        room = self.rooms[room_type][0]
+                        self.room_dict[room] = []
+                print(self.room_dict)
         if not allocated:
             self.unallocated[room_type].append(person)
             print("unallocated")
             print(self.unallocated)
+
+
 
 
 def welcome_msg():
