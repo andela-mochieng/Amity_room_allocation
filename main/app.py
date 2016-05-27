@@ -18,6 +18,7 @@ class Amity(object):
     """Description for amity"""
 
     def __init__(self, db_name="amity.sqlite"):
+
         self.conn = sqlite3.connect(db_name)
         self.connect = self.conn.cursor()
         self.rooms = {
@@ -94,9 +95,6 @@ class Amity(object):
                         print(person)
                         if not room_name == room_moved_to:
                             self.rooms[room_type][room_name].remove(person)
-                            # print(
-                            #     str(person) + "   successfully unallocated from  " + room_name)
-                            # allocate them to new room
                             for room_names, room_occupants in self.rooms[room_type].iteritems():
                                 if room_moved_to == room_names:
                                     room_capacity = len(room_occupants)
