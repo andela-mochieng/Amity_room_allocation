@@ -84,19 +84,35 @@ class Amity(object):
                 people_space.append(person)
                 print(self.rooms)
                 print("Personnel saved")
-                ipdb.set_trace()
                 return self.rooms
 
         self.unallocated[room_type].append(person)
-        print("unallocated")
+        print("The following are unallocated:'\n'")
         print(self.unallocated)
 
     def reallocate_person(self, person_id, room_moved_to):
-        for room_name, room_people in self.room_dict.iteritems():
-            for people in room_people:
-                if person_id == str(people._id):
-                    print(people)
+        for room_type in self.rooms.keys():
+            for room_name, room_people in self.rooms[room_type].iteritems():
+                for person in room_people:
+                    if person_id == str(person._id):
+                        print(person)
+                        if not room_name == room_moved_to:
+                            self.rooms[room_type][room_name].remove(person)
+                            print(str(person) + "   successfully unallocated from  " + room_name)
+                            # allocate them to new room
+                            for room_names, room_occupants in self.rooms[room_type].iteritems():
+                                if room_moved_to == room_names:
+                                    ipdb.set_trace()
+                                    room_capacity = len(room_occupants)
+                                    if not self.space.is_filled(room_capacity):
+                                        room_occupants.append(person)
+                                        print (room_occupants)
+                                        print(str(person) + "successfully reallocated to " + room_moved_to)
+                                        return room_moved_to
+        print("not found")
 
+    def load_people(self):
+        pass
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
