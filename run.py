@@ -7,6 +7,7 @@ Usage:
     Amity print_allocations [--o=filename]
     Amity print_unallocated [--o=filename]
     Amity print_room <room_name>
+    Amity save_state
     Amity load_state <sqlite_database>
     Amity (-l | --launch)
     Amity (-h | --help)
@@ -83,9 +84,9 @@ class Amity_function_call(cmd.Cmd):
         amity.reallocate_person(arg['<person_id>'], arg['<new_room_name>'])
 
     @parser_cmd
-    def do_load_people(self, *args):
+    def do_load_people(self, *arg):
         """Usage: load_people"""
-        amity.load_people(*args)
+        amity.load_people(*arg)
 
 
     @parser_cmd
@@ -95,9 +96,9 @@ class Amity_function_call(cmd.Cmd):
 
 
     @parser_cmd
-    def do_print_unallocated(self, **kwargs):
+    def do_print_unallocated(self, *arg):
         """Usage: print_unallocated [--o=filename]"""
-        amity.print_unallocated(**kwargs)
+        amity.print_unallocated(*arg)
 
     @parser_cmd
     def do_print_room(self, arg):
@@ -106,9 +107,13 @@ class Amity_function_call(cmd.Cmd):
         amity.print_room(arg['<room_name>'])
 
     @parser_cmd
+    def do_save_state(self, *arg):
+        """Usage: save_state [--db=sqlite_database] """
+        amity.save_state()
+
+    @parser_cmd
     def do_load_state(self, arg):
         """Usage: load_state <sqlite_database>"""
-
         amity.load_state(arg)
 
     def quit(self):
