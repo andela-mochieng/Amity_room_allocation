@@ -18,7 +18,7 @@ class Person(object):
         return person
 
     def __repr__(self):
-        return "#-{} {} {}". format(self._id, self.name, self.want_housing)
+        return "{} {} {}". format(self._id, self.name, self.want_housing)
 
     @property
     def person_type(self):

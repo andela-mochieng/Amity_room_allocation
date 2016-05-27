@@ -1,22 +1,26 @@
 import ipdb
+
+
 class Room(object):
     """Room is the parent and Office and Living_space inherit from it"""
     members = []
 
     def __init__(self, name):
         self.name = name
+        self.filled = False
 
-    def __repr__(self):
-        return "{}".format(self.name)
+    def room_name(self):
+        return self.name
 
     def add_member(self, person):
-        if len(self.members) < self.capacity:
-            print self.capacity
-            self.members.append(person)
-        return self.is_filled()
+        self.members.append(person)
 
-    def is_filled(self):
-        return len(self.members) >= self.capacity
+    def is_filled(self, size):
+        self.filled = size >= self.capacity
+        return self.filled
+
+    def __repr__(self):
+        return "{}".format(self.is_filled())
 
 
 class Office(Room):
