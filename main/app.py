@@ -20,7 +20,7 @@ class Amity(object):
 
     def __init__(self):
         self.rooms = {
-            'O': [], 'L': []
+            'O': {}, 'L': {}
         }
         self.people = {
             'staff and fellow': [],
@@ -35,12 +35,7 @@ class Amity(object):
         self.allocated_office = {}
         self.allocated_living = {}
 
-        self.filled_rooms = {
-            'O': [], 'L': []
-        }
-        self.room_dict = {}
         self.space = {}
-        self.full_populated_room = []
 
     def create_rooms(self, rooms, room_type=None):
         """Allows user to enter a list of room names specifying
@@ -54,16 +49,16 @@ class Amity(object):
                 room_type = raw_input(
                     "Try again. Enter Room Type:\n O: Office space \n L: Living space: \n"
                 )
+        random.shuffle(rooms)
         for room_name in rooms:
             if room_type.upper() == 'O':
                 self.space = Office(room_name)
-                self.rooms['O'].append(self.space.room_name())
+                self.rooms['O'].update({room_name: []})
+
             else:
                 self.space = LivingSpace(room_name)
-                self.rooms['L'].append(self.space.room_name())
-
-        random.shuffle(self.rooms['O'])
-        random.shuffle(self.rooms['L'])
+                self.rooms['L'].update({room_name: []})
+        print(self.rooms)
         print('New rooms succesfully created')
 
     def add_person(self, first_name, last_name, person_type, want_housing):
@@ -77,38 +72,30 @@ class Amity(object):
         else:
             self.people['staff and fellow'].append(person)
         self.allocate_room(person, 'O')
-        print("Personnel saved")
 
 
     def allocate_room(self, person, room_type):
-        ''' we get the name of the first available room, check if the room exist,
-        Get the number of occupants,Alllocate the room till its full, if room filled remove it
-        else alllocate room, store unallocated'''
-        allocated = False
-        if self.rooms[room_type] != []:
-            room = self.rooms[room_type][0]
-            if self.room_dict.get(room) is None:
-                self.room_dict[room] = []
-                check_capacity = len(self.room_dict[room])
-                while not allocated:
-                    if not self.space.is_filled(check_capacity):
-                        self.room_dict[room].append(person)
-                        allocated = True
-                    print(self.room_dict)
-                    self.full_populated_room.append(self.rooms[room_type].remove(room))
-                    print("fullly")
-                    print(self.full_populated_room)
+        """
+        Get the number of occupants,Alllocate the room till its full, if room
+        filled remove it else alllocate room, store unallocated"""
+        for room_name, people_space in self.rooms[room_type].iteritems():
+            check_capacity = len(people_space)
+            if not self.space.is_filled(check_capacity):
+                people_space.append(person)
+                print(self.rooms)
+                print("Personnel saved")
+                ipdb.set_trace()
+                return self.rooms
 
-                    if self.rooms[room_type] != []:
-                        room = self.rooms[room_type][0]
-                        self.room_dict[room] = []
-                print(self.room_dict)
-        if not allocated:
-            self.unallocated[room_type].append(person)
-            print("unallocated")
-            print(self.unallocated)
+        self.unallocated[room_type].append(person)
+        print("unallocated")
+        print(self.unallocated)
 
-
+    def reallocate_person(self, person_id, room_moved_to):
+        for room_name, room_people in self.room_dict.iteritems():
+            for people in room_people:
+                if person_id == str(people._id):
+                    print(people)
 
 
 def welcome_msg():
