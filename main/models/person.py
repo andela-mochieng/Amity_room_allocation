@@ -1,34 +1,41 @@
 from itertools import count
 
-class Person(object):
+
+class Person():
+    person_type = ''
     person_id = count(1)
+    allocated = False
+    FELLOW = 'FELLOW'
+    STAFF = 'STAFF'
 
-    def __init__(self, name, want_housing):
+    def __init__(self, name, living_space=False):
         self.name = name
-        self.want_housing = want_housing
-        self.assigned_room = None
-        self.assigned_office = None
+        self.living_space = living_space
         self._id = next(self.person_id)
+        self.allocation = {}
 
+
+    def is_staff(self):
+        return self.person_type == self.STAFF
+
+    def set_allocation(self, room):
+        self.allocation[room.room_type] = room.name
 
     @classmethod
-    def create_person(cls, name, type, want_housing):
-        person = Fellow(name, want_housing) if type.lower(
-        ) == "fellow" else Staff(name)
-        return person
+    def instance(cls, name, person_type, want_housing='N'):
+        living_space = True if want_housing == 'Y' else False
+        if person_type.upper() == Person.STAFF:
+            return Staff(name, False)
+        else:
+            return Fellow(name, living_space)
 
     def __repr__(self):
-        return "{} {} {}". format(self._id, self.name, self.want_housing)
-
-    @property
-    def person_type(self):
-        return self.__class__.__name__
+        return "{} {} {}". format(self._id, self.name, self.living_space)
 
 
 class Fellow(Person):
-    pass
+    person_type = Person.FELLOW
 
 
 class Staff(Person):
-    def __init__(self, name):
-        super(Staff, self).__init__(name, "N")
+    person_type = Person.STAFF

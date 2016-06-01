@@ -1,8 +1,8 @@
 """Amity room allocation application has the following
 Usage:
-    Amity create_rooms <room_name>...
+    Amity create_rooms (<room_name> <room_type>)...
     Amity add_person  <first_fname> <last_name> <person_type> [--wa=n]
-    Amity reallocate_person <person_id> <new_room_name>
+    Amity reallocate_person <person_id> <new_room_name> [-l]
     Amity load_people
     Amity print_allocations [--o=filename]
     Amity print_unallocated [--o=filename]
@@ -17,7 +17,7 @@ Options:
 """
 import sys
 import cmd
-from main.app import Amity, welcome_msg
+from main.amity import Amity, welcome_msg
 from docopt import docopt, DocoptExit
 
 amity = Amity()
@@ -63,8 +63,8 @@ class Amity_function_call(cmd.Cmd):
 
     @parser_cmd
     def do_create_rooms(self, arg):
-        """Usage: create_rooms <room_name>..."""
-        amity.create_rooms(arg['<room_name>'])
+        """Usage: create_rooms (<room_name> <room_type>)..."""
+        amity.create_rooms(arg)
 
     @parser_cmd
     def do_add_person(self, arg):
@@ -80,8 +80,8 @@ class Amity_function_call(cmd.Cmd):
 
     @parser_cmd
     def do_reallocate_person(self, arg):
-        """Usage: reallocate_person  <person_id> <new_room_name>"""
-        amity.reallocate_person(arg['<person_id>'], arg['<new_room_name>'])
+        """Usage: reallocate_person <person_id> <new_room_name> [-l]"""
+        amity.reallocate_person(arg)
 
     @parser_cmd
     def do_load_people(self, *arg):
