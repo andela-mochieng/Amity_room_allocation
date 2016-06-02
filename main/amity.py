@@ -76,8 +76,6 @@ class Amity(object):
         room_name = arg['<new_room_name>'].upper()
         person_id = arg['<person_id>'].upper()
         room_type = 'OFFICE' if not arg['-l'] else 'LIVINGSPACE'
-        import ipdb
-        ipdb.set_trace()
         person = self.get_person_id(person_id)
         if not person:
             print('No person with ID: ' + person_id)
@@ -89,29 +87,33 @@ class Amity(object):
                            person.name() + ' to ' + room_name + '? Y/N: ')
             if answer == 'N':
                 return False
-
+        import ipdb; ipdb.set_trace()
         if room_name in person.allocation.values():
             print(person.name() + ' already allocated to ' + room_name)
             return False
         for room_kind, name_of_room in person.allocation.iteritems():
             if room_name == name_of_room:
+
                 room = self.remove_person_from_room(person, room_kind)
+                import ipdb; ipdb.set_trace()
                 if not room:
                     print('Unable to find person in a room')
                     return False
-        person.living_space = True if room_kind == 'LIVINGSPACE' else False
-        if not person.allocated(person, room_name):
-            msg = person.name() + ' cannot be allocated to ' + room_name
-            msg += '; verify that ' + room_name + ' is a/an ' + room_type
-            print(msg)
-            if room:
-                room.allocate(person)
-                print(person.name() + ' has been moved to ' + room.name)
+
+        if room_type == 'LIVINGSPACE' and person.living_space is True:
+            if not person.allocated:
+                msg = person.name() + ' cannot be allocated to ' + room_name
+                msg += '; verify that ' + room_name + ' is a/an ' + room_type
+                print(msg)
+                if room:
+                    room.allocate(person)
+                    print(person.name() + ' has been moved to ' + room.name)
 
     def get_room_name(self, room_name):
         """
         This method will return a room corresponding to the room name parameter
         """
+        import ipdb; ipdb.set_trace()
         return [room for room in self.rooms if room.name.lower() == room_name.lower()]
 
     def get_person_id(self, person_id):
@@ -120,13 +122,13 @@ class Amity(object):
         for person in self.people:
             for pers_id in str(person._id):
                 if person_id == pers_id:
-                    print(person)
                     return person
         return False
 
     def remove_person_from_room(self, person, room_type):
         """Remove person from a room"""
         room_name = person.allocation[room_type]
+        import ipdb; ipdb.set_trace()
         room = self.get_room_name(room_name)
         if room:
             if room[0]:
@@ -201,24 +203,24 @@ class Amity(object):
                 print(room.get_members())
 
     def print_unallocated(self, *args):
-        '''Prints the people unallocated rooms'''
+        """Prints the people unallocated rooms"""
+        import ipdb; ipdb.set_trace()
         try:
             file_name = args[0]['--o']
         except TypeError:
             file_name = None
         if file_name:
             with open(file_name, 'a+') as f:
-                for room_type, unallocated in self.unallocated.iteritems():
-                    f.write(room_type + '\n' +
-                            str(unallocated).strip('[').strip(']') + '\n')
-
+                for person in self.people:
+                    if not person.allocated:
+                        f.write(person + '\n')
         else:
             puts(colored.green(
                 '\n Below is list of personnel unallocated to rooms: \n'))
-            for room_type, unallocated in self.unallocated.iteritems():
-                line = len(str(unallocated))
-                print(room_type + '\n' + '-' * line + '\n' +
-                      str(unallocated).strip('[').strip(']'))
+            for person in self.people:
+                if not person.allocated:
+                    line = len(str(person))
+                    print('-' * line + '\n' + person)
 
     def print_room(self, view_room_members):
         ''' Prints people allocated to rooms'''
@@ -230,37 +232,45 @@ class Amity(object):
         '''Creates the database tables'''
         try:
             self.connect.execute(
-                "CREATE TABLE IF NOT EXISTS People(id INTEGER PRIMARY KEY AUTOINCREMENT, Names TEXT)")
+                "CREATE TABLE IF NOT EXISTS People(id INTEGER PRIMARY KEY AUTOINCREMENT, Names TEXT, Person_type TEXT, Want_housing TEXT, Offices TEXT, Housing TEXT)")
 
             self.connect.execute(
-                "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Room_name TEXT)")
+                "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Room_type TEXT, Members TEXT)")
         except sqlite3.IntegrityError:
             return False
 
     def save_state(self, *args):
         '''persists data to the database'''
         self.create_tables()
-        for room_type in self.rooms.keys():
-            for room_name, room_people in self.rooms[room_type].iteritems():
-                self.connect.execute(
-                    "INSERT INTO People(Names) VALUES(?)",
-                    [str(self.people)])
+        import ipdb; ipdb.set_trace()
+        for person in self.people:
+            for room_type, room_name in person.allocation.iteritems():
+                if room_type.upper() == 'OFFICE':
+                    self.connect.execute(
+                        "INSERT INTO People(Names, Person_type, Want_housing ) VALUES(?, ?, ?)",
+                        [str(person.name), str(person.person_type), str(person.living_space)])
+                if room_type.upper() == 'OFFICE':
+                    self.connect.execute(
+                        "UPDATE People SET Offices = ? ", [room_name])
+                if room_type.upper() == 'LIVING_SPACE':
+                    self.connect.execute(
+                        "UPDATE People SET Housing = ? ", [room_name])
             self.conn.commit()
-        for room_type, unallocated in self.unallocated.iteritems():
+        for room in self.rooms:
             self.connect.execute(
-                "INSERT INTO Rooms(Room_name) VALUES(?)", [str(self.rooms)])
+                "INSERT INTO Rooms(Name, Room_type, Members) VALUES(?, ?, ?)", [str(room.name), str(room.room_type), str(room.members)])
             self.conn.commit()
 
     def load_state(self, args):
         '''loads data from the database'''
-        puts(colored.green(" Data stored in the Allocation's table"))
+        puts(colored.green(" Data stored in the People table"))
         people = self.connect.execute(
             "SELECT * FROM People").fetchall()
         for person in people:
             person = list(person)
             print(' '.join([str(i) for i in person]))
 
-        puts(colored.green(" Data stored in the Unallocated table"))
+        puts(colored.green(" Data stored in the Room table"))
         rooms = self.connect.execute(
             "SELECT * FROM Rooms").fetchall()
         for room in rooms:
