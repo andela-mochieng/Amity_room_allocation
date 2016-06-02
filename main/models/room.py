@@ -6,10 +6,11 @@ class Room():
     OFFICE = 'OFFICE'
     LIVING_SPACE = 'LIVING_SPACE'
     capacity = 0
-    members = []
+
 
     def __init__(self, name):
         self.name = name
+        self.members = []
 
 
 

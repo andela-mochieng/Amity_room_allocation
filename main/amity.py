@@ -50,19 +50,17 @@ class Amity(object):
         """ adds personnel calls allocate method """
         name = first_name + " " + last_name
         person = Person.instance(name, person_type, want_housing)
-
+        self.people.append(person)
         if self.rooms:
             room = self.get_random_available_room(Room.OFFICE)
-        import ipdb; ipdb.set_trace()
+
         if not room:
             print('no room')
             return False
-
         if not room.allocate(person):
             print('unable to allocate ' + person.name)
         else:
             print(person.name + ' allocated to ' + room.name)
-
         if person.person_type.lower() == 'fellow' and person.living_space:
             living_room = self.get_random_available_room(Room.LIVING_SPACE)
             if living_room:
@@ -78,13 +76,14 @@ class Amity(object):
         room_name = arg['<new_room_name>'].upper()
         person_id = arg['<person_id>'].upper()
         room_type = 'OFFICE' if not arg['-l'] else 'LIVINGSPACE'
-        import ipdb; ipdb.set_trace()
+        import ipdb
+        ipdb.set_trace()
         person = self.get_person_id(person_id)
         if not person:
             print('No person with ID: ' + person_id)
             return False
 
-        if not person.is_allocated:
+        if not person.allocated:
             person.name() + ' has not been allocated to a room'
             answer = print('Do you want to allocate ' +
                            person.name() + ' to ' + room_name + '? Y/N: ')
@@ -94,14 +93,14 @@ class Amity(object):
         if room_name in person.allocation.values():
             print(person.name() + ' already allocated to ' + room_name)
             return False
-
-        room = self.remove_person_from_room(person, room_type)
-        if not room:
-            print('Unable to find person in a room')
-            return False
-
-        person.living_space = True if room_type == 'LIVINGSPACE' else False
-        if not self.allocated(person, room_name):
+        for room_kind, name_of_room in person.allocation.iteritems():
+            if room_name == name_of_room:
+                room = self.remove_person_from_room(person, room_kind)
+                if not room:
+                    print('Unable to find person in a room')
+                    return False
+        person.living_space = True if room_kind == 'LIVINGSPACE' else False
+        if not person.allocated(person, room_name):
             msg = person.name() + ' cannot be allocated to ' + room_name
             msg += '; verify that ' + room_name + ' is a/an ' + room_type
             print(msg)
@@ -113,15 +112,15 @@ class Amity(object):
         """
         This method will return a room corresponding to the room name parameter
         """
-        import ipdb; ipdb.set_trace()
         return [room for room in self.rooms if room.name.lower() == room_name.lower()]
 
     def get_person_id(self, person_id):
         """Return person instance with corresponding person_id"""
-        import ipdb; ipdb.set_trace()
-        for person in Room.members:
-            for person_id in person.person_id:
-                if person.person_id == person_id:
+
+        for person in self.people:
+            for pers_id in str(person._id):
+                if person_id == pers_id:
+                    print(person)
                     return person
         return False
 
@@ -130,9 +129,25 @@ class Amity(object):
         room_name = person.allocation[room_type]
         room = self.get_room_name(room_name)
         if room:
-            if room[0].remove_person(person):
+            if room[0]:
+                self.remove_person(person)
                 self.remove_from_room = room[0]
                 return room[0]
+        return False
+
+    def remove_person(self, person):
+        """Removes person from people list """
+
+        for index, person_in in enumerate(self.people):
+            if person_in.name == person.name:
+                self.people.pop(index)
+                del person.allocation[self.room_type]
+                if self.room_type == 'LIVINGSPACE':
+                    person.living_space = False
+                if not person.allocation:
+                    person.allocated = False
+                return True
+
         return False
 
     def load_people(self, load_file):
@@ -205,21 +220,20 @@ class Amity(object):
                 print(room_type + '\n' + '-' * line + '\n' +
                       str(unallocated).strip('[').strip(']'))
 
-    def print_room(self, room):
+    def print_room(self, view_room_members):
         ''' Prints people allocated to rooms'''
-        for room_type in self.rooms.keys():
-            for room_name, room_people in self.rooms[room_type].iteritems():
-                if room == room_name:
-                    print(room_people)
+        for room in self.rooms:
+            if room.name.lower() == view_room_members.lower():
+                print(room.members)
 
     def create_tables(self):
         '''Creates the database tables'''
         try:
             self.connect.execute(
-                "CREATE TABLE IF NOT EXISTS Allocations(id INTEGER PRIMARY KEY AUTOINCREMENT, Room_names TEXT, Occupants TEXT)")
+                "CREATE TABLE IF NOT EXISTS People(id INTEGER PRIMARY KEY AUTOINCREMENT, Names TEXT)")
 
             self.connect.execute(
-                "CREATE TABLE IF NOT EXISTS Unallocated(id INTEGER PRIMARY KEY AUTOINCREMENT, Room_type TEXT, unallocated TEXT)")
+                "CREATE TABLE IF NOT EXISTS Rooms(id INTEGER PRIMARY KEY AUTOINCREMENT, Room_name TEXT)")
         except sqlite3.IntegrityError:
             return False
 
@@ -229,30 +243,29 @@ class Amity(object):
         for room_type in self.rooms.keys():
             for room_name, room_people in self.rooms[room_type].iteritems():
                 self.connect.execute(
-                    "INSERT INTO Allocations(Room_names, Occupants) VALUES(?, ?)",
-                    [str(room_name), str(room_people)])
+                    "INSERT INTO People(Names) VALUES(?)",
+                    [str(self.people)])
             self.conn.commit()
         for room_type, unallocated in self.unallocated.iteritems():
             self.connect.execute(
-                "INSERT INTO Unallocated(Room_type, unallocated) VALUES(?, ?)",
-                [str(room_type), str(unallocated)])
+                "INSERT INTO Rooms(Room_name) VALUES(?)", [str(self.rooms)])
             self.conn.commit()
 
     def load_state(self, args):
         '''loads data from the database'''
         puts(colored.green(" Data stored in the Allocation's table"))
-        allocations = self.connect.execute(
-            "SELECT * FROM Allocations").fetchall()
-        for room in allocations:
-            room = list(room)
-            print(' '.join([str(i) for i in room]))
+        people = self.connect.execute(
+            "SELECT * FROM People").fetchall()
+        for person in people:
+            person = list(person)
+            print(' '.join([str(i) for i in person]))
 
         puts(colored.green(" Data stored in the Unallocated table"))
-        unallocated = self.connect.execute(
-            "SELECT * FROM Unallocated").fetchall()
-        for room_type in unallocated:
-            room_type = list(room_type)
-            print(' '.join([str(i) for i in room_type]))
+        rooms = self.connect.execute(
+            "SELECT * FROM Rooms").fetchall()
+        for room in rooms:
+            room = list(room)
+            print(' '.join([str(i) for i in room]))
 
 
 def welcome_msg():

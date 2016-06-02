@@ -4,7 +4,6 @@ from itertools import count
 class Person():
     person_type = ''
     person_id = count(1)
-    allocated = False
     FELLOW = 'FELLOW'
     STAFF = 'STAFF'
 
@@ -13,6 +12,7 @@ class Person():
         self.living_space = living_space
         self._id = next(self.person_id)
         self.allocation = {}
+        self.allocated = False
 
 
     def is_staff(self):
@@ -20,6 +20,7 @@ class Person():
 
     def set_allocation(self, room):
         self.allocation[room.room_type] = room.name
+        self.allocated = True
 
     @classmethod
     def instance(cls, name, person_type, want_housing='N'):
