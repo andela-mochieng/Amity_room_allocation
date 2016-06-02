@@ -92,7 +92,9 @@ class Amity_function_call(cmd.Cmd):
     @parser_cmd
     def do_print_allocations(self, *arg):
         """Usage: print_allocations [--o=filename.txt]"""
-        amity.print_allocations(*arg)
+        print(arg[0])
+        amity.print_allocations(*arg[0])
+
 
 
     @parser_cmd

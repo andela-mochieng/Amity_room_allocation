@@ -17,7 +17,6 @@ class Room():
     def allocate(self, person):
         if self.filled():
             return False
-
         if person.person_type.upper() == "FELLOW" and person.living_space:
                 self.check_member_exists(person)
                 return True
