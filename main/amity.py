@@ -240,8 +240,9 @@ class Amity(object):
     def print_room(self, view_room_members):
         ''' Prints people allocated to rooms'''
         for room in self.rooms:
-            if room.name.lower() == view_room_members.lower():
+            if room.name.lower() == view_room_members:
                 print(room.members)
+                return True
 
     def create_tables(self):
         '''Creates the database tables'''
