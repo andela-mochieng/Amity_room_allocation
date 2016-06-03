@@ -297,6 +297,6 @@ class Amity(object):
 
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
-    # cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
-    # print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-    # Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
+    cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
+    print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
+    Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
