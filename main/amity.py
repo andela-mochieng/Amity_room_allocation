@@ -15,7 +15,7 @@ import ipdb
 
 
 class Amity(object):
-    """Description for amity"""
+    '''Description for amity'''
     people = []
     rooms = []
 
@@ -27,8 +27,8 @@ class Amity(object):
 
 
     def create_rooms(self, args):
-        """Allows user to enter a list of room names specifying
-                whether office or living spaces"""
+        '''Allows user to enter a list of room names specifying
+                whether office or living spaces'''
         for index, room_name in enumerate(args['<room_name>']):
             room = Room.instance(room_name, args['<room_type>'][index])
             self.rooms.append(room)
@@ -48,7 +48,7 @@ class Amity(object):
         return selected
 
     def add_person(self, first_name, last_name, person_type, want_housing):
-        """ adds personnel calls allocate method """
+        '''adds personnel calls allocate method '''
         name = first_name + " " + last_name
         person = Person.instance(name, person_type, want_housing)
         self.people.append(person)
@@ -73,7 +73,7 @@ class Amity(object):
             print("Person doesn't require housing")
 
     def reallocate_person(self, arg):
-        """Reallocate person from one room to another"""
+        '''Reallocate person from one room to another'''
 
         room_name = arg['<new_room_name>'].upper()
         person_id = arg['<person_id>']
@@ -119,16 +119,16 @@ class Amity(object):
                     print(person.name + ' has been moved to ' + room.name)
 
     def get_room_name(self, room_name):
-        """
+        '''
         This method will return a room corresponding to the room name parameter
-        """
+        '''
         for room in self.rooms:
             if room.name.lower() == room_name.lower():
                 return room
             return False
 
     def get_person_id(self, person_id):
-        """Return person instance with corresponding person_id"""
+        '''Return person instance with corresponding person_id'''
         for person in self.people:
             for pers_id in str(person._id):
                 if str(person_id) == pers_id:
@@ -136,7 +136,7 @@ class Amity(object):
                 return False
 
     def remove_person_from_room(self, person, room_type):
-        """Remove person from a room"""
+        '''Remove person from a room'''
         room_name = person.allocation[room_type]
         room = self.get_room_name(room_name)
         if room:
@@ -191,8 +191,8 @@ class Amity(object):
             print('print_allocations and unallocated to view allocations')
 
     def print_allocations(self, *args):
-        """function prints to the screen people allocated to rooms as well
-        as to a file if specified"""
+        '''function prints to the screen people allocated to rooms as well
+        as to a file if specified'''
 
         try:
             file_name = args[0]['--o']
@@ -216,7 +216,7 @@ class Amity(object):
                 print(room.get_members())
 
     def print_unallocated(self, *args):
-        """Prints the people unallocated rooms"""
+        '''Prints the people unallocated rooms'''
         try:
             file_name = args[0]['--o']
         except TypeError:
