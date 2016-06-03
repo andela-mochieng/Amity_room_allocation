@@ -33,7 +33,7 @@ class amitytest(unittest.TestCase):
         self.assertEqual(self.amity.people[1].name, 'Chidi Nnadi')
 
     def test_get_random_available_room(self):
-
+        """ Test that personnel are allocated to rooms randomly"""
         room = self.amity.get_random_available_room('OFFICE')
         self.assertIn(room.name, ['Room 3', 'Room4'])
         self.assertEqual(self.amity.get_random_available_room('unknown'), None)
@@ -67,6 +67,7 @@ class amitytest(unittest.TestCase):
             {'<name_of_room>': 'Room 1'}), None)
 
     def test_get_room_name(self):
+        """ Test that we can search for a room by name"""
         self.amity.rooms = []
         self.amity.create_rooms({
             '<room_name>': ['Room 1'],
@@ -77,6 +78,7 @@ class amitytest(unittest.TestCase):
 
 
     def test_reallocate_person(self):
+        """Test that a person can be reallocated to a different room """
         self.amity.people = []
         Person.person_id = count(1)
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
@@ -95,6 +97,7 @@ class amitytest(unittest.TestCase):
                          'LIVING_SPACE'], new_room)
 
     def test_get_person_id(self):
+        """ Test that we can search personnel by id"""
         self.amity.people = []
         Person.person_id = count(1)
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
@@ -103,6 +106,7 @@ class amitytest(unittest.TestCase):
         self.assertEqual(self.amity.get_person_id(2), False)
 
     def test_save_state(self):
+        """ Test whether data is save to the db """
         self.assertFalse(self.amity.create_tables(), False)
         self.amity.save_state('test.sqlite')
         conn = sqlite3.connect('test.sqlite')
@@ -116,7 +120,6 @@ class amitytest(unittest.TestCase):
             self.assertEqual(row[2], 'FELLOW')
             self.assertEqual(row[3], 'True')
             break
-
 
 
     def tearDown(self):
