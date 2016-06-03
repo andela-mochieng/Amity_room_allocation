@@ -10,4 +10,7 @@ omit=
 
 exclude_lines =
     if __name__ == .__main__.:
-        reallocation_people
+        load_people
+        remove_person
+        remove_person_from_room
+

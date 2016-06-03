@@ -141,7 +141,6 @@ class Amity(object):
         room = self.get_room_name(room_name)
         if room:
             if room.name:
-                import ipdb; ipdb.set_trace()
                 self.remove_person(person, room_type)
 
                 for room in self.rooms:

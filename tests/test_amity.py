@@ -94,6 +94,16 @@ class amitytest(unittest.TestCase):
             self.assertEqual(person.allocation[
                          'LIVING_SPACE'], new_room)
 
+    def test_get_person_id(self):
+        self.amity.people = []
+        Person.person_id = count(1)
+        self.amity.add_person("Margie", "Rain", "Fellow", "Y")
+        self.assertEqual(self.amity.get_person_id("1").name,
+            'Margie Rain')
+        self.assertEqual(self.amity.get_person_id(2), False)
+
+
+
 
     def tearDown(self):
 
