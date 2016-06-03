@@ -1,4 +1,5 @@
 import unittest
+from itertools import count
 import sqlite3
 import os
 from ..main.amity import Amity, welcome_msg
@@ -32,7 +33,7 @@ class amitytest(unittest.TestCase):
         self.assertEqual(self.amity.people[1].name, 'Chidi Nnadi')
 
     def test_get_random_available_room(self):
-        self.amity.rooms
+
         room = self.amity.get_random_available_room('OFFICE')
         self.assertIn(room.name, ['Room 3', 'Room4'])
         self.assertEqual(self.amity.get_random_available_room('unknown'), None)
@@ -41,8 +42,10 @@ class amitytest(unittest.TestCase):
 
 
     def test_amity_load_person(self):
+        self.amity.people = []
         self.amity.load_people("tests/testData.txt")
         self.assertTrue(os.path.exists("tests/testData.txt"))
+        self.assertTrue(len(self.amity.people), 3)
 
     def test_print_allocations(self):
         """
@@ -63,8 +66,22 @@ class amitytest(unittest.TestCase):
     def test_print_room(self):
         self.assertEqual(self.amity.print_room({'<name_of_room>':'Room 1'}), None)
 
+    def test_get_room_name(self):
+        self.amity.rooms = []
+        self.amity.create_rooms({
+            '<room_name>': ['Room 1'],
+            '<room_type>': ['living'],
+        })
+        self.assertEqual(self.amity.get_room_name("Room 1").name,  "Room 1")
+        self.assertEqual(self.amity.get_room_name("Room1"), False)
 
-
+    def test_get_person_id(self):
+        self.amity.people = []
+        Person.person_id = count(1)
+        self.amity.add_person("Margie", "Rain", "Fellow", "Y")
+        self.assertEqual(self.amity.get_person_id("1").name,
+            'Margie Rain')
+        self.assertEqual(self.amity.get_person_id(2), False)
 
     def tearDown(self):
         self.amity=None

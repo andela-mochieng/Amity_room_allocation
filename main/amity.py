@@ -125,7 +125,10 @@ class Amity(object):
         """
         This method will return a room corresponding to the room name parameter
         """
-        return [room for room in self.rooms if room.name.lower() == room_name.lower()]
+        for room in self.rooms:
+            if room.name.lower() == room_name.lower():
+                return room
+            return False
 
     def get_person_id(self, person_id):
         """Return person instance with corresponding person_id"""
@@ -133,7 +136,7 @@ class Amity(object):
             for pers_id in str(person._id):
                 if person_id == pers_id:
                     return person
-        return False
+                return False
 
     def remove_person_from_room(self, person, room_type):
         """Remove person from a room"""

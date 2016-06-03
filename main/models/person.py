@@ -31,7 +31,7 @@ class Person():
             return Fellow(name, living_space)
 
     def __repr__(self):
-        return "{} {} {}". format(self._id, self.name, self.living_space)
+        return "{} {} {}".format(self._id, self.name, self.living_space)
 
 
 class Fellow(Person):
