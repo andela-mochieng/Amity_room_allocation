@@ -264,7 +264,6 @@ class Amity(object):
                     "INSERT INTO People(Names, Person_type, Want_housing ) VALUES(?, ?, ?)",
                     [str(person.name), str(person.person_type), str(person.living_space)])
                 self.conn.commit()
-                import ipdb; ipdb.set_trace()
                 if room_type.upper() == 'OFFICE':
                     self.connect.execute(
                         "UPDATE People SET Offices = ? ", [room_name])

@@ -102,6 +102,20 @@ class amitytest(unittest.TestCase):
             'Margie Rain')
         self.assertEqual(self.amity.get_person_id(2), False)
 
+    def test_save_state(self):
+        self.assertFalse(self.amity.create_tables(), False)
+        self.amity.save_state('test.sqlite')
+        conn = sqlite3.connect('test.sqlite')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * from People ")
+        for row in cursor:
+            # import ipdb; ipdb.set_trace()
+            self.assertEqual(row[0], 1)
+            self.assertEqual(row[1], 'Margie Rain')
+            self.assertEqual(row[2], 'FELLOW')
+            self.assertEqual(row[3], 'True')
+            break
 
 
 
