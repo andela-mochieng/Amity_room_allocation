@@ -74,15 +74,15 @@ class Amity(object):
 
     def reallocate_person(self, arg):
         """Reallocate person from one room to another"""
-        room_name = arg['<new_room_name>'].upper()
-        person_id = arg['<person_id>'].upper()
-        room_type = 'OFFICE' if not arg['-l'] else 'LIVINGSPACE'
-        person = self.get_person_id(person_id)
-        import ipdb; ipdb.set_trace()
-        if not person:
-            print('No person with ID: ' + person_id)
-            return False
 
+        room_name = arg['<new_room_name>'].upper()
+        person_id = arg['<person_id>']
+        room_type = 'OFFICE' if not arg['-l'] else 'LIVING_SPACE'
+
+        person = self.get_person_id(person_id)
+        if not person:
+            print('No person with ID: '+ str(person_id))
+            return False
         if not person.allocated:
             person.name + ' has not been allocated to a room'
             answer = print('Do you want to allocate ' +
@@ -96,7 +96,6 @@ class Amity(object):
         if room_type == 'OFFICE':
             for room_kind, name_of_room in person.allocation.iteritems():
                 if room_type == room_kind:
-                    import ipdb; ipdb.set_trace()
                     room = self.remove_person_from_room(person, room_kind)
                     for room in self.rooms:
                         if room_name.upper() == str(room.name).upper():
@@ -106,15 +105,13 @@ class Amity(object):
                 if not room:
                     print('Unable to find person in a room')
                     return False
-
-        if room_type == 'LIVINGSPACE' and person.living_space is True:
+        if room_type == 'LIVING_SPACE' and person.living_space is True:
             if not person.living_space:
                 msg = person.name + ' cannot be allocated to ' + room_name
                 msg += '; verify that ' + room_name + ' is a/an ' + room_type
                 print(msg)
             for room_kind, name_of_room in person.allocation.iteritems():
                 if room_type == room_kind:
-                    import ipdb; ipdb.set_trace()
                     room = self.remove_person_from_room(person, room_kind)
                     for room in self.rooms:
                         if room_name.upper() == str(room.name).upper():
@@ -134,7 +131,7 @@ class Amity(object):
         """Return person instance with corresponding person_id"""
         for person in self.people:
             for pers_id in str(person._id):
-                if person_id == pers_id:
+                if str(person_id) == pers_id:
                     return person
                 return False
 
@@ -143,9 +140,10 @@ class Amity(object):
         room_name = person.allocation[room_type]
         room = self.get_room_name(room_name)
         if room:
-            if room[0]:
-                self.remove_person(person, room_type)
+            if room.name:
                 import ipdb; ipdb.set_trace()
+                self.remove_person(person, room_type)
+
                 for room in self.rooms:
                     for room_member in room.members:
                         if str(person).upper() == str(room_member).upper():

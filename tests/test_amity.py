@@ -40,7 +40,6 @@ class amitytest(unittest.TestCase):
         room = self.amity.get_random_available_room('LIVING_SPACE')
         self.assertIn(room.name, ['Room 1', 'Room 2'])
 
-
     def test_amity_load_person(self):
         self.amity.people = []
         self.amity.load_people("tests/testData.txt")
@@ -64,7 +63,8 @@ class amitytest(unittest.TestCase):
         os.remove("testfile.txt")
 
     def test_print_room(self):
-        self.assertEqual(self.amity.print_room({'<name_of_room>':'Room 1'}), None)
+        self.assertEqual(self.amity.print_room(
+            {'<name_of_room>': 'Room 1'}), None)
 
     def test_get_room_name(self):
         self.amity.rooms = []
@@ -72,19 +72,32 @@ class amitytest(unittest.TestCase):
             '<room_name>': ['Room 1'],
             '<room_type>': ['living'],
         })
-        self.assertEqual(self.amity.get_room_name("Room 1").name,  "Room 1")
+        self.assertEqual(self.amity.get_room_name("Room 1").name, "Room 1")
         self.assertEqual(self.amity.get_room_name("Room1"), False)
 
-    def test_get_person_id(self):
+
+    def test_reallocate_person(self):
         self.amity.people = []
         Person.person_id = count(1)
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
-        self.assertEqual(self.amity.get_person_id("1").name,
-            'Margie Rain')
-        self.assertEqual(self.amity.get_person_id(2), False)
+        person = self.amity.people[0]
+        if person.allocation['LIVING_SPACE'] == 'Room 1':
+            new_room = "Room 2"
+        else:
+            new_room = "Room 1"
+        self.amity.reallocate_person({
+            '<person_id>': person._id,
+            '<new_room_name>': new_room,
+            '-l': True,
+        })
+        for person in self.amity.people:
+            self.assertEqual(person.allocation[
+                         'LIVING_SPACE'], new_room)
+
 
     def tearDown(self):
-        self.amity=None
+
+        self.amity = None
 
 
 if __name__ == '__main__':
