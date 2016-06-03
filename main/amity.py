@@ -25,7 +25,6 @@ class Amity(object):
         self.connect = self.conn.cursor()
         self.remove_from_room = ''
 
-
     def create_rooms(self, args):
         '''Allows user to enter a list of room names specifying
                 whether office or living spaces'''
@@ -81,7 +80,7 @@ class Amity(object):
 
         person = self.get_person_id(person_id)
         if not person:
-            print('No person with ID: '+ str(person_id))
+            print('No person with ID: ' + str(person_id))
             return False
         if not person.allocated:
             person.name + ' has not been allocated to a room'
@@ -162,7 +161,6 @@ class Amity(object):
                 return True
 
         return False
-
 
     def load_people(self, load_file):
         '''Allows user to allocate people by loading data from a file '''
@@ -294,9 +292,8 @@ class Amity(object):
             print(' '.join([str(i) for i in room]))
 
 
-
 def welcome_msg():
     init(strip=not sys.stdout.isatty())
     cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
     print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
-    Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)
+          Style.DIM + '\n(type help to get a list of commands)' + Style.NORMAL)

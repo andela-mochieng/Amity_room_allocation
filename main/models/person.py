@@ -14,7 +14,6 @@ class Person():
         self.allocation = {}
         self.allocated = False
 
-
     def is_staff(self):
         return self.person_type == self.STAFF
 

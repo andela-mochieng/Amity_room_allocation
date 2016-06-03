@@ -2,10 +2,8 @@ import unittest
 from itertools import count
 import sqlite3
 import os
-from ..main.amity import Amity, welcome_msg
-from ..main.models.person import Person, Fellow, Staff
-from ..main.models.room import Office, LivingSpace
-import ipdb
+from ..main.amity import Amity
+
 
 
 class amitytest(unittest.TestCase):
@@ -76,7 +74,6 @@ class amitytest(unittest.TestCase):
         self.assertEqual(self.amity.get_room_name("Room 1").name, "Room 1")
         self.assertEqual(self.amity.get_room_name("Room1"), False)
 
-
     def test_reallocate_person(self):
         """Test that a person can be reallocated to a different room """
         self.amity.people = []
@@ -94,7 +91,7 @@ class amitytest(unittest.TestCase):
         })
         for person in self.amity.people:
             self.assertEqual(person.allocation[
-                         'LIVING_SPACE'], new_room)
+                'LIVING_SPACE'], new_room)
 
     def test_get_person_id(self):
         """ Test that we can search personnel by id"""
@@ -102,7 +99,7 @@ class amitytest(unittest.TestCase):
         Person.person_id = count(1)
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
         self.assertEqual(self.amity.get_person_id("1").name,
-            'Margie Rain')
+                         'Margie Rain')
         self.assertEqual(self.amity.get_person_id(2), False)
 
     def test_save_state(self):
@@ -120,7 +117,6 @@ class amitytest(unittest.TestCase):
             self.assertEqual(row[2], 'FELLOW')
             self.assertEqual(row[3], 'True')
             break
-
 
     def tearDown(self):
 
