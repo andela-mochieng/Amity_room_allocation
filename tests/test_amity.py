@@ -3,7 +3,8 @@ from itertools import count
 import sqlite3
 import os
 from ..main.amity import Amity
-
+from ..main.models.person import Person, Fellow, Staff
+from ..main.models.room import Office, LivingSpace
 
 
 class amitytest(unittest.TestCase):
