@@ -17,7 +17,6 @@ class amitytest(unittest.TestCase):
             '<room_name>': ['Room 1', 'Room 2', 'Room 3', 'Room4'],
             '<room_type>': ['living', 'living', 'office', 'office'],
         })
-
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
         self.amity.add_person("Chidi", "Nnadi", "Staff", 'N')
         self.amity.add_person("Margie", "Akoth", "Fellow", "N")
@@ -43,7 +42,6 @@ class amitytest(unittest.TestCase):
     def test_amity_load_person(self):
         self.amity.people = []
         self.amity.load_people("tests/testData.txt")
-        self.assertTrue(os.path.exists("tests/testData.txt"))
         self.assertTrue(len(self.amity.people), 3)
 
     def test_print_allocations(self):
@@ -62,9 +60,6 @@ class amitytest(unittest.TestCase):
             self.assertIn('Margie Rain,\n', lines)
         os.remove("testfile.txt")
 
-    def test_print_room(self):
-        self.assertEqual(self.amity.print_room(
-            {'<name_of_room>': 'Room 1'}), None)
 
     def test_get_room_name(self):
         """ Test that we can search for a room by name"""
