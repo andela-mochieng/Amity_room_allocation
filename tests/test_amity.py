@@ -17,6 +17,7 @@ class amitytest(unittest.TestCase):
             '<room_name>': ['Room 1', 'Room 2', 'Room 3', 'Room4'],
             '<room_type>': ['living', 'living', 'office', 'office'],
         })
+
         self.amity.add_person("Margie", "Rain", "Fellow", "Y")
         self.amity.add_person("Chidi", "Nnadi", "Staff", 'N')
         self.amity.add_person("Margie", "Akoth", "Fellow", "N")

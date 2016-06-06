@@ -35,11 +35,13 @@ class Amity(object):
                   ' successfully created')
 
     def get_available_rooms(self, room_type):
+        """Get list of rooms that are are not filled"""
         available_rooms = [room for room in self.rooms if not room.filled(
         ) and room.room_type == room_type.upper()]
         return available_rooms
 
     def get_random_available_room(self, room_type):
+        """Of the available rooms  from the getavailable_rooms method get a random room to allocate personnel"""
         available_rooms = self.get_available_rooms(room_type)
         selected = None
         if available_rooms:
@@ -254,7 +256,7 @@ class Amity(object):
             return False
 
     def save_state(self, *args):
-        """persists data to the database"""
+        """Persists data to the database"""
         self.create_tables()
         for person in self.people:
             for room_type, room_name in person.allocation.iteritems():
@@ -276,7 +278,7 @@ class Amity(object):
             self.conn.commit()
 
     def load_state(self, args):
-        '''loads data from the database'''
+        '''Loads data from the database'''
         puts(colored.green(" Data stored in the People table"))
         people = self.connect.execute(
             "SELECT * FROM People").fetchall()
@@ -293,6 +295,7 @@ class Amity(object):
 
 
 def welcome_msg():
+    """ Displays the welcome message to the screen"""
     init(strip=not sys.stdout.isatty())
     cprint(figlet_format('Amity'), 'cyan', attrs=['bold'])
     print(Back.BLUE + 'Amity Room Allocation!' + Back.RESET +
